@@ -6,7 +6,7 @@ THIS_ROOT = ../tronferno-mcu-bin
 MK_FLAGS =  FW_BASE=$(THIS_ROOT)/.firmware BUILD_BASE=$(THIS_ROOT)/.build CPPFLAGS+=-DDISTRIBUTION -C $(TRONFERNO_MCU_ROOT)
 
 
-.PHONY : all commit pull push distribute
+.PHONY : all clean commit pull push distribute
 
 
 distribute : all pull commit push
