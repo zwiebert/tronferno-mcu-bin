@@ -39,8 +39,8 @@ You need an ESP8266 board with USB connector. The firmware is build for a board 
   * download the files
   * open command prompt and change to directory containing the avr_flash.bat file
   * connect ISP-flasher to PC via USB cable and to ATmega328p via ISP cable
-  * find out which COM port the flasheris connected to (e.g. by device manager) 
-  * (install avrdude and add it the path)
+  * find out which COM port the flasher hardware is connected to (e.g. by device manager) 
+  * (install avrdude and add it to path)
   * run: avr_flash.bat COMxx
 
 
@@ -50,5 +50,9 @@ You need an ESP8266 board with USB connector. The firmware is build for a board 
   * open command prompt and change to directory containing the avr_flash.sh file
   * connect ISP-flasher to PC via USB cable and to ATmega328p via ISP cable
   * find out which serial port the ESP is connected to (e.g. ls /dev/ttyACM* ) 
-  * (install avrdude and add it the path)
+  * (install avrdude and add it to path)
   * run: . avr_flash.sh /dev/ttyACMx
+
+
+### Problems
+  * the Linux package "modemmanager" may get in the way of accessing /dev/ttyACMx . I uninstalled that thing with "sudo apt remove modemmanager" because I don't have a modem and it was pretty annoying. Can be also disabled temporarily (use google).
