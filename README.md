@@ -49,7 +49,7 @@ You need an ESP8266 board with USB connector. The firmware is build for a board 
   * download the files
   * open command prompt and change to directory containing the avr_flash.sh file
   * connect ISP-flasher to PC via USB cable and to ATmega328p via ISP cable
-  * find out which serial port the ESP is connected to (e.g. ls /dev/ttyACM* ) 
+  * find out which serial port the flasher hardware is connected to (e.g. ls /dev/ttyACM* ) 
   * (install avrdude and add it to path)
   * run: . avr_flash.sh /dev/ttyACMx
 
