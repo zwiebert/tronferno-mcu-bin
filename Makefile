@@ -14,14 +14,14 @@ distribute : all pull commit push
 
 
 all:
-	make $(ESP_MK_FLAGS) esp8266-rebuild
+	$(MAKE) -j 9 $(ESP_MK_FLAGS) esp8266-all-force
 	cp -p .firmware/eagle.flash.bin .firmware/eagle.irom0text.bin ./firmware/
-	make $(AVR_MK_FLAGS) atmega328-rebuild
+	$(MAKE) -j 9 $(AVR_MK_FLAGS) atmega328-all-force
 	cp -p .avrbuild/lean/fernotron.hex .avrbuild/lean/fernotron.eep ./firmware
 
 clean:
-	make $(ESP_MK_FLAGS) esp8266-clean
-	make $(AVR_MK_FLAGS) atmega328-clean
+	$(MAKE) $(ESP_MK_FLAGS) esp8266-clean
+	$(MAKE) $(AVR_MK_FLAGS) atmega328-clean
 
 
 commit :
