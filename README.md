@@ -2,6 +2,19 @@
 
 MCU firmware binary for [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu).
 
+## ESP32
+
+You need an ESP32 board with USB connetor. The firmware is build for a board with 4 MByte flash.
+GPIO-Pins (for now): RF_OUT=17. RF_IN=22
+
+### Usage on Linux
+
+  * download the files
+  * open command prompt and change to directory containing the flash.sh file
+  * connect ESP32 to PC via USB cable
+  * find out which serial port the ESP is connected to (ls /dev/ttyUSB* ) 
+  * (install python, if not already installed)
+  * run: . flash_esp32.sh /dev/ttyUSBx
 
 ## ESP8266
 
@@ -14,7 +27,7 @@ You need an ESP8266 board with USB connector. The firmware is build for a board 
   * open command prompt and change to directory containing the flash.bat file
   * connect ESP8266 to PC via USB cable
   * find out which COM port the ESP is connected to (e.g. by device manager) 
-  * run: flash.bat COMxx
+  * run: flash_esp8266.bat COMxx
 
 
 ### Usage on Linux
@@ -24,7 +37,7 @@ You need an ESP8266 board with USB connector. The firmware is build for a board 
   * connect ESP8266 to PC via USB cable
   * find out which serial port the ESP is connected to (ls /dev/ttyUSB* ) 
   * (install python, if not already installed)
-  * run: . flash.sh /dev/ttyUSBx
+  * run: . flash_esp8266.sh /dev/ttyUSBx
 
 
  ### Problems
@@ -41,7 +54,7 @@ You need an ESP8266 board with USB connector. The firmware is build for a board 
   * connect ISP-flasher to PC via USB cable and to ATmega328p via ISP cable
   * find out which COM port the flasher hardware is connected to (e.g. by device manager) 
   * (install avrdude and add it to path)
-  * run: avr_flash.bat COMxx
+  * run: flash_atmega328.bat COMxx
 
 
 ### Usage on Linux
@@ -51,7 +64,7 @@ You need an ESP8266 board with USB connector. The firmware is build for a board 
   * connect ISP-flasher to PC via USB cable and to ATmega328p via ISP cable
   * find out which serial port the flasher hardware is connected to (e.g. ls /dev/ttyACM* ) 
   * (install avrdude and add it to path)
-  * run: . avr_flash.sh /dev/ttyACMx
+  * run: . flash_atmega328.sh /dev/ttyACMx
 
 
 ### Problems
