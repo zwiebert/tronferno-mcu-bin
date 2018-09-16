@@ -2,6 +2,7 @@
 THIS_ROOT = ~/proj/mcu/tronferno-mcu-bin
 TRONFERNO_MCU_ROOT = ./tronferno-mcu
 BUILD_BASE = tmp
+TRONFERNO_MCU_REPO = ~/proj/mcu/tronferno-mcu
 
 ESP8266_MK_FLAGS = DISTRO=1 FW_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_firmware BUILD_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_build -C $(TRONFERNO_MCU_ROOT)
 
@@ -21,7 +22,7 @@ FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
 
 
 
-distribute : fetch_source all pull commit push
+distribute : all commit push
 
 
 esp8266:  
@@ -39,7 +40,7 @@ atmega328:
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-all
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
-all:  esp8266 esp32 atmega328
+all:  fetch_source esp8266 esp32 atmega328
 
 
 clean:
@@ -48,7 +49,7 @@ clean:
 	$(MAKE) $(ESP32_MK_FLAGS) esp32-clean
 
 fetch_source:
-	cd $(TRONFERNO_MCU_ROOT) && git pull && git checkout master
+	cd $(TRONFERNO_MCU_ROOT) && git checkout master && git pull 
 
 commit :
 	git commit -a -m "new binaries"
