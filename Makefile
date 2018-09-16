@@ -12,8 +12,8 @@ AVR_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/atmega328_build
 AVR_MK_FLAGS = DISTRO=1 FW_BASE=$(AVR_FW_DIR) BUILD_BASE=$(AVR_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 
-ESP32_BUILD_DIR = $(TRONFERNO_MCU_ROOT)/user/esp32/build
-ESP32_MK_FLAGS = DISTRO=1 FW_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp32_firmware BUILD_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp32_build -C $(TRONFERNO_MCU_ROOT)
+ESP32_BUILD_DIR = ../../../$(BUILD_BASE)/esp32_build
+ESP32_MK_FLAGS = DISTRO=1 BUILD_DIR_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
 FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
@@ -33,7 +33,7 @@ esp8266:
 esp32: 
 	mkdir -p firmware/esp32
 	make   $(ESP32_MK_FLAGS) esp32-all
-	cp -p $(ESP32_BUILD_DIR)/bootloader/bootloader.bin $(ESP32_BUILD_DIR)/tronferno-mcu.bin $(ESP32_BUILD_DIR)/partitions.bin ./firmware/esp32/
+	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin ./firmware/esp32/
 
 atmega328: 
 	mkdir -p firmware/atmega328
@@ -49,7 +49,7 @@ clean:
 	$(MAKE) $(ESP32_MK_FLAGS) esp32-clean
 
 fetch_source:
-	cd $(TRONFERNO_MCU_ROOT) && git checkout master && git pull 
+	cd $(TRONFERNO_MCU_ROOT) && git checkout master && git clean -fd && git pull 
 
 commit :
 	git commit -a -m "new binaries"
