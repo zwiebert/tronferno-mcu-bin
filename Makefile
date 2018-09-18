@@ -18,7 +18,7 @@ ESP32_MK_FLAGS = DISTRO=1 BUILD_DIR_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_R
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
 FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
 
-.PHONY : all clean commit pull push distribute fetch_source esp8266 esp32 atmega328
+.PHONY : all clean clean2 commit pull push distribute fetch_source esp8266 esp32 atmega328
 
 
 
@@ -44,6 +44,9 @@ all:  fetch_source esp8266 esp32 atmega328
 
 
 clean:
+	rm -r tmp
+
+clean2:
 	$(MAKE) $(ESP8266_MK_FLAGS) esp8266-clean
 	$(MAKE) $(AVR_MK_FLAGS) atmega328-clean
 	$(MAKE) $(ESP32_MK_FLAGS) esp32-clean
