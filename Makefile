@@ -31,19 +31,23 @@ distribute : all commit push
 
 
 esp8266:  
+	cd $(TRONFERNO_MCU_ROOT) && git checkout master
 	mkdir -p firmware/esp8266
 	make  $(ESP8266_MK_FLAGS) esp8266-all
 	cp -p $(BUILD_BASE)/esp8266_firmware/eagle.flash.bin $(BUILD_BASE)/esp8266_firmware/eagle.irom0text.bin ~/esp/ESP8266_NONOS_SDK/bin/esp_init_data_default_v08.bin ./firmware/esp8266/
 
 esp32: 
+	cd $(TRONFERNO_MCU_ROOT) && git checkout master
 	mkdir -p firmware/esp32
 	make   $(ESP32_MK_FLAGS) esp32-all
 	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin ./firmware/esp32/
 
-atmega328: atmega328_source
+atmega328:
+	cd $(TRONFERNO_MCU_ROOT) && git checkout $(ATMEGA328_CO)
 	mkdir -p firmware/atmega328
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-all
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
+	cd $(TRONFERNO_MCU_ROOT) && git checkout master
 
 all:  fetch_source esp8266 esp32 atmega328
 
