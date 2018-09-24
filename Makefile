@@ -18,6 +18,11 @@ ESP32_MK_FLAGS = DISTRO=1 BUILD_DIR_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_R
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
 FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
 
+
+#ATMEGA328_CO = c25106956f0390be7b5d7ddef5f92cac19734172
+#ATMEGA328_CO = e43ceccbd621e6cfc8847afe6f6436b7022a7062
+#ATMEGA328_CO = ec3374a68515502bc80e721a971b2995110ec7ec
+ATMEGA328_CO = e29af9767c6492f66b1fe99637737d14fd82d5b9
 .PHONY : all clean clean2 commit pull push distribute fetch_source esp8266 esp32 atmega328
 
 
@@ -35,7 +40,7 @@ esp32:
 	make   $(ESP32_MK_FLAGS) esp32-all
 	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin ./firmware/esp32/
 
-atmega328: 
+atmega328: atmega328_source
 	mkdir -p firmware/atmega328
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-all
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
@@ -53,6 +58,10 @@ clean2:
 
 fetch_source:
 	cd $(TRONFERNO_MCU_ROOT) && git checkout master && git clean -fd && git pull 
+
+atmega328_source: fetch_source
+	cd $(TRONFERNO_MCU_ROOT) && git checkout $(ATMEGA328_CO)
+
 
 commit :
 	git commit -a -m "new binaries"
