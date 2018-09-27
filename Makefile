@@ -43,11 +43,11 @@ esp32:
 	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin ./firmware/esp32/
 
 atmega328:
-	cd $(TRONFERNO_MCU_ROOT) && git checkout $(ATMEGA328_CO)
+	cd $(TRONFERNO_MCU_ROOT) && mv user/esp32/sdkconfig user/esp32/xxx_sdkconfig && git checkout $(ATMEGA328_CO)
 	mkdir -p firmware/atmega328
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-all
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
-	cd $(TRONFERNO_MCU_ROOT) && git checkout master
+	cd $(TRONFERNO_MCU_ROOT) && git checkout master && mv user/esp32/xxx_sdkconfig user/esp32/sdkconfig
 
 all:  fetch_source esp8266 esp32 atmega328
 
