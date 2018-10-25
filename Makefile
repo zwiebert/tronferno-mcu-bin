@@ -1,8 +1,8 @@
 
-THIS_ROOT = ~/proj/mcu/tronferno-mcu-bin
+THIS_ROOT = $(HOME)/proj/mcu/tronferno-mcu-bin
 TRONFERNO_MCU_ROOT = ./tronferno-mcu
 BUILD_BASE = tmp
-TRONFERNO_MCU_REPO = ~/proj/mcu/tronferno-mcu
+TRONFERNO_MCU_REPO = $(HOME)/proj/mcu/tronferno-mcu
 
 ESP8266_MK_FLAGS = DISTRO=1 FW_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_firmware BUILD_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_build -C $(TRONFERNO_MCU_ROOT)
 
