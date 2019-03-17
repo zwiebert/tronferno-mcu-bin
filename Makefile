@@ -37,7 +37,7 @@ esp32: pre_esp32 main_esp32 post_esp32
 atmega328: pre_atmega328 main_atmega328 post_atmega328
 
 pre_esp8266:  
-	cd $(TRONFERNO_MCU_ROOT) git pull && git checkout --force $(GIT_BRANCH) && git clean -fd
+	cd $(TRONFERNO_MCU_ROOT) git pull $(GIT_BRANCH) && git checkout --force $(GIT_BRANCH) && git clean -fd
 	mkdir -p firmware/esp8266
 	make  $(ESP8266_MK_FLAGS) esp8266-clean
 main_esp8266:
