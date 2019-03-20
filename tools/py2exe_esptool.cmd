@@ -45,9 +45,9 @@ if exist %pythondir% (
 	echo Found Python 2.7 !ARCH!
         echo Downloading py2exe...
 	if "!ARCH!"=="x86" (
-		"%curdir%\wget.exe" "http://kent.dl.sourceforge.net/project/py2exe/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe" -O "%curdir%\py2exe-0.6.9.win32-py2.7.exe"
+		"wget.exe" "http://kent.dl.sourceforge.net/project/py2exe/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe" -O "%curdir%\py2exe-0.6.9.win32-py2.7.exe"
 	) else (
-		"%curdir%\wget.exe" "http://kent.dl.sourceforge.net/project/py2exe/py2exe/0.6.9/py2exe-0.6.9.win64-py2.7.amd64.exe" -O "%curdir%\py2exe-0.6.9.win64-py2.7.amd64.exe"
+		"wget.exe" "http://kent.dl.sourceforge.net/project/py2exe/py2exe/0.6.9/py2exe-0.6.9.win64-py2.7.amd64.exe" -O "%curdir%\py2exe-0.6.9.win64-py2.7.amd64.exe"
 	)
 	if exist "%curdir%\py2exe-0.6.9.win32-py2.7.exe" (
 	        echo Installing py2exe...
