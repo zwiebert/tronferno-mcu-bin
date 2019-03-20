@@ -37,7 +37,7 @@ esp32: pre_esp32 main_esp32 post_esp32
 atmega328: pre_atmega328 main_atmega328 post_atmega328
 
 pre_esp8266:  
-	cd $(TRONFERNO_MCU_ROOT) git pull && git checkout --force $(GIT_BRANCH) && git clean -fd
+	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp8266
 	make  $(ESP8266_MK_FLAGS) esp8266-clean
 main_esp8266:
@@ -47,7 +47,7 @@ post_esp8266:
 
 
 pre_esp32:
-	cd $(TRONFERNO_MCU_ROOT) && git pull && git checkout --force $(GIT_BRANCH) && git clean -fd
+	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp32
 	make  $(ESP32_MK_FLAGS) esp32-clean
 main_esp32: 
@@ -56,7 +56,7 @@ post_esp32:
 	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin ./firmware/esp32/
 
 pre_atmega328:
-	cd $(TRONFERNO_MCU_ROOT) && git pull && git checkout --force $(ATMEGA328_CO) && git clean -fd
+	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_CO) &&  git clean -fd
 	mkdir -p firmware/atmega328
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-clean
 main_atmega328:
