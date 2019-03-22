@@ -275,14 +275,13 @@ def ui_verify_opt(key, value):
     """
     check general options for correctness
     """
-    p = opts_verify[key]
-    h = opts_help[key]
-    if p and not p.match(value):
-        print "ERROR: invalid formatted value for key %s: %s" % (key, value)
-        if h:
-            print "HELP: " + h
-        press_enter()
-        return False
+    if key in opts_verify:
+        if not opts_verify[key].match(value):
+            print "ERROR: invalid formatted value for key %s: %s" % (key, value)
+            if key in opts_help:
+                print "HELP: " + opts_help[key]
+            press_enter()
+            return False
     return True
 
 
@@ -312,9 +311,8 @@ def ui_menu_opts(text, c_hash, proc_opts=0, ver_opts=0):
             try:
                 key, value = c_list[int(c)-1]
                 s = ""
-                h = opts_help[key]
-                if h:
-                    print "help: " + h
+                if key in opts_help:
+                    print "help: " + opts_help[key]
                 if proc_opts:
                     s = proc_opts(key, value)
                 if not s:
