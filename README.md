@@ -64,16 +64,19 @@ MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwieb
   6. Press 'w' to write the firmware to chip
   7. Press 'c' to configure WLAN and MQTT login data
   ```
-  Press key to choose menu item:
-  
-   q) apply changes and leave menu
-   X) discard changes and leave menu
-  
-   1) chip (esp32)
-   2) flash-size (detect)
-   3) serial-baud (115200)
-   4) serial-port (/dev/ttyUSB0)
-  
+ Press key to choose menu item:
+ 
+  q) apply changes and leave menu
+  X) discard changes and leave menu
+ 
+  1) wlan-ssid ()
+  2) mqtt-user ()
+  3) mqtt-enable ()
+  4) mqtt-url ()
+  5) wlan-password ()
+  6) mqtt-password ()
+ 
+ 
   ```
   8. Press 'o' to write WLAN and MQTT login data to the chip
 
