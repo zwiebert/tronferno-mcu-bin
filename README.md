@@ -52,19 +52,19 @@ writing firmware.  These must be run from main directory:
 
 ### MQTT
 
-    * MQTT feature in Tronferno is still under development and will change
+* MQTT feature in Tronferno is still under development and will change
 
-    * Commands will be expected at MQTT topic tfmcu/cli
+1. Commands will be expected at MQTT topic tfmcu/cli
 
-      * Don't terminate commands with a semicolon (like in USB-CLI)
+  * Don't terminate commands with a semicolon (like in USB-CLI)
 
-      * Don't send multiple commands at once separated by semicolon
+  * Don't send multiple commands at once separated by semicolon
 
-      * You can prepend all commands with word "cli" (gives access to
-        all CLI commands). The following commands can be used without
-        this prefix word: send, timer, config.  This behaviour makes
-        thing more convinient in FHEM.
+  * You can prepend all commands with word "cli" (gives access to all
+    CLI commands). The following commands can be used without this
+    prefix word: send, timer, config.  This behaviour makes thing more
+    convinient in FHEM.
 
-  * MCU-config data will be posted at MQTT topic tfmcu/config_out in JSON format
+2. MCU-config data will be posted at MQTT topic tfmcu/config_out in JSON format
 
-  * Timer/automatic data will be postet at MQTT topic tfmcu/timer_out in JSON format
+3. Timer/automatic data will be postet at MQTT topic tfmcu/timer_out in JSON format
