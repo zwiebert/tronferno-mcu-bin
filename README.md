@@ -1,71 +1,70 @@
-# tronferno-mcu-bin
+# Tronferno / tronferno-mcu-bin
 
-MCU firmware binary for [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu).
+MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu).
 
-## ESP32
+## Overview
 
-You need an ESP32 board with USB connetor. The firmware is build for a board with 4 MByte flash.
-GPIO-Pins (for now): RF_OUT=17. RF_IN=22
+  * provide all functions of a Fernotron programming central unit 2411, so it can replace it (mostly)
+  * MQTT interface for easy integration with home automation servers
+  * easy to flash and to configurer with interactive tool
+  * ESP32 using ESP-IDF, 4MB FLASH.
+  * ESP8266 using NONOS, 4MB FLASH.  (Firmware untested. No MQTT.)
+  * ATMEGA328 using SDK. (Old version. Limited features. No WLAN.)
 
-### Usage on Linux
+## Programming the Firmware and configure connection data
 
-  * download the files
-  * open command prompt and change to directory containing the flash.sh file
-  * connect ESP32 to PC via USB cable
-  * find out which serial port the ESP is connected to (ls /dev/ttyUSB* ) 
-  * (install python, if not already installed)
-  * run: . flash_esp32.sh /dev/ttyUSBx
+  * Run menutool (menutool.sh on Linux) from main directory.
+  * Connect your esp32 or esp8266 via USB
+  * Press 'i' to find the correct port
+  * Press 'f' to configure chip model (esp32/esp8266) and serial port
+  * If you want to erase the chip, press 'e'
+  * Press 'w' to write the firmware to chip
+  * Press 'c' to configure WLAN and MQTT login data
+  * Press 'o' to write WLAN and MQTT login data to the chip
 
-## ESP8266
+Alternatively there are scripts (both Linux and Windows versions) for
+writing firmware.  These must be run from main directory:
 
-You need an ESP8266 board with USB connector. The firmware is build for a board with 4 MByte flash.
-
-
-### Usage on Windows
-
-  * download the files
-  * open command prompt and change to directory containing the flash.bat file
-  * connect ESP8266 to PC via USB cable
-  * find out which COM port the ESP is connected to (e.g. by device manager) 
-  * run: flash_esp8266.bat COMxx
-
-
-### Usage on Linux
-
-  * download the files
-  * open command prompt and change to directory containing the flash.sh file
-  * connect ESP8266 to PC via USB cable
-  * find out which serial port the ESP is connected to (ls /dev/ttyUSB* ) 
-  * (install python, if not already installed)
-  * run: . flash_esp8266.sh /dev/ttyUSBx
+  flash_esp32 SERIAL_PORT
+  flash_esp8266 SERIAL_PORT
+  flash_atmega328 SERIAL_PORT
 
 
- ### Problems
-  * Should only be flashed on the 4 MByte variant of ESP8266. 
-  * Flash mode is set to DIO for better compatibilty (-fm dio). I bought some "integrated" boards, which will not work with -fm qio.
-  
+## Wiring Radio transmitter (and receiver) to pins:
 
-## ATmega328P
+ * ESP32: RF_Transmitter=GPIO_17, RF_Receiver=GPIO_22
 
-### Usage on Windows
+ * ESP8266: RF_Transmitter=GPIO_4 (D2), RF_Receiver=GPIO_5 (D1)
 
-  * download the files
-  * open command prompt and change to directory containing the avr_flash.bat file
-  * connect ISP-flasher to PC via USB cable and to ATmega328p via ISP cable
-  * find out which COM port the flasher hardware is connected to (e.g. by device manager) 
-  * (install avrdude and add it to path)
-  * run: flash_atmega328.bat COMxx
+ * ATMEGA328:  RF_Transmitter=PB3 (D11), RF_Receiver=PD2 (D2)
 
+## Sending Commands
 
-### Usage on Linux
+  * the firmware provides a command line interface
 
-  * download the files
-  * open command prompt and change to directory containing the avr_flash.sh file
-  * connect ISP-flasher to PC via USB cable and to ATmega328p via ISP cable
-  * find out which serial port the flasher hardware is connected to (e.g. ls /dev/ttyACM* ) 
-  * (install avrdude and add it to path)
-  * run: . flash_atmega328.sh /dev/ttyACMx
+  * commands can be send via USB, TCP-server or MQTT
 
+  * commands lines are always terminated with semicolon
 
-### Problems
-  * the Linux package "modemmanager" may get in the way of accessing /dev/ttyACMx . I uninstalled that thing with "sudo apt remove modemmanager" because I don't have a modem and it was pretty annoying. Can be also disabled temporarily (use google).
+  * There is no echo on USB. Use local echo. Backspace key works.
+
+  * Use command  "help all;" to show all commands and options
+
+### MQTT
+
+    * MQTT feature in Tronferno is still under development and will change
+
+    * Commands will be expected at MQTT topic tfmcu/cli
+
+      * Don't terminate commands with a semicolon (like in USB-CLI)
+
+      * Don't send multiple commands at once separated by semicolon
+
+      * You can prepend all commands with word "cli" (gives access to
+        all CLI commands). The following commands can be used without
+        this prefix word: send, timer, config.  This behaviour makes
+        thing more convinient in FHEM.
+
+  * MCU-config data will be posted at MQTT topic tfmcu/config_out in JSON format
+
+  * Timer/automatic data will be postet at MQTT topic tfmcu/timer_out in JSON format
