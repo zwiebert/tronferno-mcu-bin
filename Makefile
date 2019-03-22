@@ -84,4 +84,15 @@ pull :
 push :
 	git push
 
+.PHONY : windos
+
+windows: tools/esptool.exe  tools/dist/tfmenuconfig/tfmenuconfig.exe
+
+
+
+tools/esptool.exe: tools/esptool.py
+	cd tools && cmd '/C py2exe_esptool.cmd'
+
+tools/dist/tfmenuconfig/tfmenuconfig.exe: tools/tfmenuconfig.py
+	cd tools && winpty /c/Python27/Scripts/pyinstaller.exe -y tfmenuconfig.py
 

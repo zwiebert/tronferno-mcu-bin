@@ -98,4 +98,3 @@ echo %py_arch%|FINDSTR 64bit>NUL && SET ARCH=AMD64 || SET ARCH=x86
 exit /b
 
 :end
-pause
