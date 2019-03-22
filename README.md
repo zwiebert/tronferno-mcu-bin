@@ -4,67 +4,126 @@ MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwieb
 
 ## Overview
 
-  * provide all functions of a Fernotron programming central unit 2411, so it can replace it (mostly)
-  * MQTT interface for easy integration with home automation servers
-  * easy to flash and to configurer with interactive tool
-  * ESP32 using ESP-IDF, 4MB FLASH.
-  * ESP8266 using NONOS, 4MB FLASH.  (Firmware untested. No MQTT.)
-  * ATMEGA328 using SDK. (Old version. Limited features. No WLAN.)
+  Tronferno is a firmware to turn an ESP32 MCU board into an hardware dongle
+  to control Fernotron devices (usually shutters).
+   
+  It aims to provide all functionality of the original programming central 2411, 
+  but it also can do just plain up/down/stop commands, if you wan't just that.
+  
+  * Command interfaces: USB, TCP, MQTT
+  * Supported by FHEM home server via specific module for USB connection
+  * Can be integrated into homer servers via its MQTT interface
+
+## Required Hardware
+
+  * ESP32, 4MB FLASH. (current main hardware for further development)
+  * ESP8266, 4MB FLASH. (deprecated, no MQTT support for now(?))
+  * ATMEGA328. (outdated firmware with limited features. No WLAN.)
 
 ## Programming the Firmware and configure connection data
 
-  * Run menutool (menutool.sh on Linux) from main directory.
-  * Connect your esp32 or esp8266 via USB
-  * Press 'i' to find the correct port
-  * Press 'f' to configure chip model (esp32/esp8266) and serial port
-  * If you want to erase the chip, press 'e'
-  * Press 'w' to write the firmware to chip
-  * Press 'c' to configure WLAN and MQTT login data
-  * Press 'o' to write WLAN and MQTT login data to the chip
+  1. Run menutool (menutool.sh on Linux) from main directory. 
+  It will give you an text based menu.
+  
+  ```
+  Press key to choose menu item:
+  
+   q) save config data to file and quit
+   X) discard config data and quit
+   s) save configuration data but don't quit
+  
+   i) find connected chips and print info
+   I) print info on chip at /dev/ttyUSB0
+   f) configure flash options like serial-port, chip-type, etc
+   w) write flash (esp32@/dev/ttyUSB0). Writes the firmware
+   e) erase flash (esp32@/dev/ttyUSB0). Usually not needed. Clears any data and firmware.
+  
+   c) configure tronferno-mcu options like WLAN and MQTT login data
+   o) write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)
+  
+  Shortcuts:
+   p) change serial port (/dev/ttyUSB0)
+   
+  ```
+  2. Connect your esp32 or esp8266 via USB
+  3. Press 'i' to find the correct port
+  4. Press 'f' to configure chip model (esp32/esp8266) and serial port
+  ```
+  Press key to choose menu item:
+  
+   q) apply changes and leave menu
+   X) discard changes and leave menu
+  
+   1) chip (esp32)
+   2) flash-size (detect)
+   3) serial-baud (115200)
+   4) serial-port (/dev/ttyUSB0)
+   
+  ```
+  5. If you want to erase the chip, press 'e'
+  6. Press 'w' to write the firmware to chip
+  7. Press 'c' to configure WLAN and MQTT login data
+  ```
+  Press key to choose menu item:
+  
+   q) apply changes and leave menu
+   X) discard changes and leave menu
+  
+   1) chip (esp32)
+   2) flash-size (detect)
+   3) serial-baud (115200)
+   4) serial-port (/dev/ttyUSB0)
+  
+  ```
+  8. Press 'o' to write WLAN and MQTT login data to the chip
 
 Alternatively there are scripts (both Linux and Windows versions) for
 writing firmware.  These must be run from main directory:
-
-  flash_esp32 SERIAL_PORT
-  flash_esp8266 SERIAL_PORT
-  flash_atmega328 SERIAL_PORT
-
+```
+  ~/tronferno-mcu-bin$ sh ./flash_esp32.sh /dev/ttyUSB0
+ ```
+ ``` 
+  C:\tronferno-mcu-bin> flash_esp8266 COM3
+```
+```  
+  ~/tronferno-mcu-bin$ sh ./flash_atmega328.sh /dev/ttyACM0
+```
 
 ## Wiring Radio transmitter (and receiver) to pins:
 
- * ESP32: RF_Transmitter=GPIO_17, RF_Receiver=GPIO_22
+ * ESP32: RF-Transmitter=GPIO_17, RF-Receiver=GPIO_22
 
- * ESP8266: RF_Transmitter=GPIO_4 (D2), RF_Receiver=GPIO_5 (D1)
+ * ESP8266: RF-Transmitter=GPIO_4 (D2), RF-Receiver=GPIO_5 (D1)
 
- * ATMEGA328:  RF_Transmitter=PB3 (D11), RF_Receiver=PD2 (D2)
+ * ATMEGA328:  RF-Transmitter=PB3 (D11), RF-Receiver=PD2 (D2)
 
-## Sending Commands
 
-  * the firmware provides a command line interface
+## Plain old Commandline Interface
+  * CLI can be used via USB-Terminal or WiFi-Terminal at TCP Port 7777
 
-  * commands can be send via USB, TCP-server or MQTT
+  * commands are terminated with semicolon. A newline is not required.
 
-  * commands lines are always terminated with semicolon
-
-  * There is no echo on USB. Use local echo. Backspace key works.
+  * Use local echo
+  
+  * Backspace key can be used.
 
   * Use command  "help all;" to show all commands and options
+  
 
 ### MQTT
 
-* MQTT feature in Tronferno is still under development and will change
+* MQTT feature in Tronferno is new and still under development. It will  change.
 
-1. Commands will be expected at MQTT topic tfmcu/cli
+* Commands will be expected at MQTT topic tfmcu/cli
 
-  * Don't terminate commands with a semicolon (like in USB-CLI)
+    * Don't terminate commands with a semicolon (like in USB-CLI)
 
-  * Don't send multiple commands at once separated by semicolon
+    * Don't send multiple commands at once separated by semicolon
 
-  * You can prepend all commands with word "cli" (gives access to all
-    CLI commands). The following commands can be used without this
-    prefix word: send, timer, config.  This behaviour makes thing more
-    convinient in FHEM.
+    * You can prepend all commands with the word "cli". This gives access to all
+    CLI commands. Only the commands send, timer, config can be used without the cli prefix.
 
-2. MCU-config data will be posted at MQTT topic tfmcu/config_out in JSON format
 
-3. Timer/automatic data will be postet at MQTT topic tfmcu/timer_out in JSON format
+* MCU-config data will be posted at MQTT topic tfmcu/config_out in JSON format
+
+* Timer/automatic data will be postet at MQTT topic tfmcu/timer_out in JSON format
