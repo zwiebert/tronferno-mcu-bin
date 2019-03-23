@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ################################################################################
 ## tfmenuconfig.py  - menu app to 
 ##       1) program firmware interactively
@@ -7,7 +8,16 @@
 ## License: GNU General Public License Version 3 (GNU GPL v3)
 ################################################################################
 
-import ConfigParser, os, serial, sys, re
+import sys, os, serial, sys, re
+PYTHON2 = (sys.version_info < (3, 0))
+
+if PYTHON2:
+    import ConfigParser as configparser
+else:
+    import configparser
+
+
+
 import serial.tools.list_ports as list_ports
 import subprocess
 
@@ -44,9 +54,9 @@ def _find_getch():
     return _getch
 getch = _find_getch()
 
+cfg = configparser.ConfigParser()
 cmd_fmt = 'config %s=%s;\n'
 ser = 0
-cfg = ConfigParser.ConfigParser()
 CONFIG_FILE = "config.ini"
 ANY = 0
 
@@ -149,14 +159,14 @@ def do_tfmcu_write_config_2(key, value):
     writes a tfmcu config key/value pair.
     """
     cmd = cmd_fmt % (key, value)
-    #print cmd
+    #print(cmd)
     ser.write(cmd)
     cmd = cmd_fmt % (key, "?")
     ser.write(cmd)
     lines = ser.readlines()
     for line in lines:
         if line.startswith("tf: "):
-            #print line
+            #print(line)
             if (line.find(" "+key+"=") != -1 and line.find("="+value.strip('\"')+";") != -1):
                 return True                   
     return False
@@ -180,9 +190,9 @@ def do_tfmcu_write_config_all():
     try:
         ser = serial.Serial(c_flash["serial-port"], int(c_flash["serial-baud"]), timeout=1)
     except:
-        print "cannot open serial port " + ser_port
+        print("cannot open serial port " + ser_port)
         ser_list = sorted(ports.device for ports in list_ports.comports())
-        print ser_list
+        print(ser_list)
         return
     
     for key, value in c_mcu.items():
@@ -245,11 +255,11 @@ def ui_menu_serial():
         n += 1
         msg_text += " %d) %s\n" % (n,port)
     msg_text += " e) edit\n"
-    print msg_text
+    print(msg_text)
     c = getch()
     try:
         if (c == 'e'):
-            print "serial port: %s" % (ser_port)
+            print("serial port: %s" % (ser_port))
             ser_port = raw_input("serial port: ")
         else:
             ser_port = ser_list[int(c)-1]
@@ -277,9 +287,9 @@ def ui_verify_opt(key, value):
     """
     if key in opts_verify:
         if not opts_verify[key].match(value):
-            print "ERROR: invalid formatted value for key %s: %s" % (key, value)
+            print("ERROR: invalid formatted value for key %s: %s" % (key, value))
             if key in opts_help:
-                print "HELP: " + opts_help[key]
+                print("HELP: " + opts_help[key])
             press_enter()
             return False
     return True
@@ -312,7 +322,7 @@ def ui_menu_opts(text, c_hash, proc_opts=0, ver_opts=0):
                 key, value = c_list[int(c)-1]
                 s = ""
                 if key in opts_help:
-                    print "help: " + opts_help[key]
+                    print("help: " + opts_help[key])
                 if proc_opts:
                     s = proc_opts(key, value)
                 if not s:
@@ -320,7 +330,7 @@ def ui_menu_opts(text, c_hash, proc_opts=0, ver_opts=0):
                 if s and ui_verify_opt(key, s) and (not ver_opts or ver_opts(key, s)):
                     c_list[int(c)-1] = (key, s)
             except Exception as e:
-                print ("ex: %s" % e)
+                print("ex: %s" % e)
                 return
 
 ui_menu_txt = "\n\n\n\nPress key to choose menu item:\n"
