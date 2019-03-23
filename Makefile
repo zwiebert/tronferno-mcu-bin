@@ -89,7 +89,7 @@ copy_docs : $(addprefix docs/, CLI.md ftron_data_format.md mcu_common.md mcu_esp
 copy_avr_docs : docs/mcu_atmega328.md
 
 
-# the following needs to made on Windows (git-bash is fine)
+# the following targets needs to be made on Windows system (git-bash is fine)
 .PHONY : windows
 windows: tools/esptool.exe  tools/dist/tfmenuconfig/tfmenuconfig.exe
 
