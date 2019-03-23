@@ -8,7 +8,7 @@ MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwieb
   to control Fernotron devices (usually shutters).
    
   It aims to provide all functionality of the original programming central 2411, 
-  but it also can do just plain up/down/stop commands, if you wan't just that.
+  but it also can do just plain up/down/stop commands, if you want just that.
   
   * Command interfaces: USB, TCP, MQTT
   * Supported by FHEM home server via specific module for USB connection
