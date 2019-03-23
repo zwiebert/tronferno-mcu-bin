@@ -1,4 +1,6 @@
 #!/bin/sh
 
 clear
-python2 tools/tfmenuconfig.py || python tools/tfmenuconfig.py
+prog=tools/tfmenuconfig.py
+
+python $prog || python2 $prog #|| python3 $prog
