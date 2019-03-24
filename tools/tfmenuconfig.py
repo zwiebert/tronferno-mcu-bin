@@ -7,7 +7,6 @@
 ## Author: Bert Winkelmann <tf.zwiebert@online.de> (2019)
 ## License: GNU General Public License Version 3 (GNU GPL v3)
 ################################################################################
-
 import sys, os, serial, sys, re
 PYTHON2 = (sys.version_info < (3, 0))
 
@@ -16,6 +15,7 @@ if PYTHON2:
 else:
     import configparser
 
+my_input = raw_input if PYTHON2 else input
 
 
 import serial.tools.list_ports as list_ports
@@ -59,6 +59,7 @@ cmd_fmt = 'config %s=%s;\n'
 ser = 0
 CONFIG_FILE = "config.ini"
 ANY = 0
+MCU_CFG_RETRY_N = 6
 
 ser_list = sorted(ports.device for ports in list_ports.comports())
 ser_port = ser_list[0] if len(ser_list) else "com1" if is_windows else "/dev/ttyUSB0"
@@ -160,22 +161,26 @@ def do_tfmcu_write_config_2(key, value):
     """
     cmd = cmd_fmt % (key, value)
     #print(cmd)
-    ser.write(cmd)
+    ser.write(cmd.encode('utf-8'))
     cmd = cmd_fmt % (key, "?")
-    ser.write(cmd)
+    ser.write(cmd.encode('utf-8'))
     lines = ser.readlines()
     for line in lines:
+        line = line.decode('utf-8')
         if line.startswith("tf: "):
             #print(line)
             if (line.find(" "+key+"=") != -1 and line.find("="+value.strip('\"')+";") != -1):
                 return True                   
     return False
 
+def write_point(): sys.stdout.write('.'); sys.stdout.flush()
+
 def do_tfmcu_write_config(key, value):
     """
     writes a tfmcu config key/value pair and reports success or failure
     """
-    for i in range(4):
+    for i in range(MCU_CFG_RETRY_N):
+        write_point()
         if do_tfmcu_write_config_2(key, value):
             print("setting option "+key+" succeeded")
             return True
@@ -241,7 +246,7 @@ def press_enter():
     """
     wait for enter key before continue to let the user loog at the command output
     """
-    raw_input("\n<press enter to continue>")
+    my_input("\n<press enter to continue>")
 
 def ui_menu_serial():
     """
@@ -260,7 +265,7 @@ def ui_menu_serial():
     try:
         if (c == 'e'):
             print("serial port: %s" % (ser_port))
-            ser_port = raw_input("serial port: ")
+            ser_port = my_input("serial port: ")
         else:
             ser_port = ser_list[int(c)-1]
     except: # nothing selected, cancel
@@ -299,14 +304,15 @@ def ui_menu_opts(text, c_hash, proc_opts=0, ver_opts=0):
     """
     creates a user menu from the given function arguments
     """
-    c_list = c_hash.items()
+    c_items = list(c_hash.items())
+    changed = {}
     while (True):
         msg_text = (text+"\n"
         " q) apply changes and leave menu\n"
         " X) discard changes and leave menu\n"
         "\n")
         n = 0
-        for key, value in c_list:
+        for key, value in c_items:
             n += 1
             msg_text += " %d) %s (%s)\n" % (n, key, value)
         print(msg_text)
@@ -314,21 +320,23 @@ def ui_menu_opts(text, c_hash, proc_opts=0, ver_opts=0):
         if (c == "X"):
             return
         elif (c == "q"):
-            for key, value in c_list:
-                c_hash[key] = value
+            for key in changed:
+                c_hash[key] = changed[key]
             return
         else:
             try:
-                key, value = c_list[int(c)-1]
+                idx = int(c)-1
+                key, value = c_items[idx]
                 s = ""
                 if key in opts_help:
                     print("help: " + opts_help[key])
                 if proc_opts:
                     s = proc_opts(key, value)
                 if not s:
-                    s = raw_input("Enter value for %s (%s): ..." % (key, value))
+                    s = my_input("Enter value for %s (%s): ..." % (key, value))
                 if s and ui_verify_opt(key, s) and (not ver_opts or ver_opts(key, s)):
-                    c_list[int(c)-1] = (key, s)
+                    c_items[idx] = (key, s)
+                    changed[key] = s
             except Exception as e:
                 print("ex: %s" % e)
                 return
