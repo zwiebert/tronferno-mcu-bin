@@ -1,71 +1,155 @@
-# tronferno-mcu-bin
+# Tronferno / tronferno-mcu-bin
 
-MCU firmware binary for [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu).
+MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu).
 
-## ESP32
+## Overview
 
-You need an ESP32 board with USB connetor. The firmware is build for a board with 4 MByte flash.
-GPIO-Pins (for now): RF_OUT=17. RF_IN=22
+  Tronferno is a firmware to turn an ESP32 MCU board into an hardware dongle
+  to control Fernotron devices (usually shutters).
+   
+  It aims to provide all functionality of the original programming central 2411, 
+  but it also can do just plain up/down/stop commands, if you want just that.
+  
+  * Command interfaces: USB, TCP, MQTT
+  * Supported by FHEM home server via specific module for USB connection
+  * Can be integrated into homer servers via its MQTT interface
 
-### Usage on Linux
+## Required Hardware
 
-  * download the files
-  * open command prompt and change to directory containing the flash.sh file
-  * connect ESP32 to PC via USB cable
-  * find out which serial port the ESP is connected to (ls /dev/ttyUSB* ) 
-  * (install python, if not already installed)
-  * run: . flash_esp32.sh /dev/ttyUSBx
+  * ESP32, 4MB FLASH. (current main hardware for further development)
+  * ESP8266, 4MB FLASH. (deprecated, no MQTT support for now(?))
+  * ATMEGA328. (outdated firmware with limited features. No WLAN.)
 
-## ESP8266
+## Programming the Firmware and configure connection data
 
-You need an ESP8266 board with USB connector. The firmware is build for a board with 4 MByte flash.
+  1. Run menutool (menutool.sh on Linux) from main directory. 
+  It will give you a text based menu.
+  
+  ```
+Press key to choose menu item:
+
+ [q] save config data to file and quit
+ [X] discard config data and quit
+ [s] save configuration data but don't quit
+
+ [i] find connected chips and print info
+ [I] print info on chip at /dev/ttyUSB0
+ [f] configure flash options like serial-port, chip-type, etc
+ [w] write flash (esp8266@/dev/ttyUSB0). Writes the firmware
+ [e] erase flash (esp8266@/dev/ttyUSB0). Usually not needed. Clears any data and firmware.
+
+ [c] configure tronferno-mcu options like WLAN and MQTT login data
+ [o] write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)
+
+Shortcuts:
+ [p] change serial port (/dev/ttyUSB0)
+   
+  ```
+  2. Connect your esp32 or esp8266 via USB
+  3. Press 'i' to find the correct port
+  4. Press 'f' to configure chip model (esp32/esp8266) and serial port
+  ```
+Press key to choose menu item:
+
+ [y] apply changes and leave menu
+ [X] discard changes and leave menu
+
+ [a] chip (esp8266)
+ [b] flash-size (detect)
+ [c] serial-baud (115200)
+ [d] serial-port (/dev/ttyUSB0)
+
+Enter value for chip (esp8266): ...esp32
+   
+  ```
+  5. If you want to erase the chip, press 'e'
+  6. Press 'w' to write the firmware to chip
+  7. Press 'c' to configure WLAN and MQTT login data
+  ```
+Press key to choose menu item:
+
+ [y] apply changes and leave menu
+ [X] discard changes and leave menu
+
+ [a] wlan-ssid (xxxx)
+ [b] mqtt-user (xxxx)
+ [c] mqtt-enable (1)
+ [d] mqtt-url (mqtt://192.168.1.42:7777)
+ [e] wlan-password (xxxx)
+ [f] mqtt-password (xxxx)
+
+ 
+  ```
+  8. Press 'o' to write WLAN and MQTT login data to the chip
+
+Alternatively there are scripts (both Linux and Windows versions) for
+writing firmware.  These must be run from main directory:
+```
+  ~/tronferno-mcu-bin$ sh ./flash_esp32.sh /dev/ttyUSB0
+ ```
+ ``` 
+  C:\tronferno-mcu-bin> flash_esp8266 COM3
+```
+```  
+  ~/tronferno-mcu-bin$ sh ./flash_atmega328.sh /dev/ttyACM0
+```
+
+## Wiring Radio transmitter (and receiver) to pins:
+
+ * ESP32: RF-Transmitter=GPIO_17, RF-Receiver=GPIO_22
+
+ * ESP8266: RF-Transmitter=GPIO_4 (D2), RF-Receiver=GPIO_5 (D1)
+
+ * ATMEGA328:  RF-Transmitter=PB3 (D11), RF-Receiver=PD2 (D2)
 
 
-### Usage on Windows
+## Plain old Commandline Interface
+  * CLI can be used via USB-Terminal or WiFi-Terminal at TCP Port 7777
 
-  * download the files
-  * open command prompt and change to directory containing the flash.bat file
-  * connect ESP8266 to PC via USB cable
-  * find out which COM port the ESP is connected to (e.g. by device manager) 
-  * run: flash_esp8266.bat COMxx
+  * commands are terminated with semicolon. A newline is not required.
 
+  * Use local echo
+  
+  * Backspace key can be used.
 
-### Usage on Linux
-
-  * download the files
-  * open command prompt and change to directory containing the flash.sh file
-  * connect ESP8266 to PC via USB cable
-  * find out which serial port the ESP is connected to (ls /dev/ttyUSB* ) 
-  * (install python, if not already installed)
-  * run: . flash_esp8266.sh /dev/ttyUSBx
-
-
- ### Problems
-  * Should only be flashed on the 4 MByte variant of ESP8266. 
-  * Flash mode is set to DIO for better compatibilty (-fm dio). I bought some "integrated" boards, which will not work with -fm qio.
+  * Use command  "help all;" to show all commands and options
   
 
-## ATmega328P
+### MQTT
 
-### Usage on Windows
-
-  * download the files
-  * open command prompt and change to directory containing the avr_flash.bat file
-  * connect ISP-flasher to PC via USB cable and to ATmega328p via ISP cable
-  * find out which COM port the flasher hardware is connected to (e.g. by device manager) 
-  * (install avrdude and add it to path)
-  * run: flash_atmega328.bat COMxx
+* MQTT feature in Tronferno is new and still under development. It
+  will change. The beta-branch firmware may be needed for some features described here.
 
 
-### Usage on Linux
+#### MQTT Topics you can send to:
 
-  * download the files
-  * open command prompt and change to directory containing the avr_flash.sh file
-  * connect ISP-flasher to PC via USB cable and to ATmega328p via ISP cable
-  * find out which serial port the flasher hardware is connected to (e.g. ls /dev/ttyACM* ) 
-  * (install avrdude and add it to path)
-  * run: . flash_atmega328.sh /dev/ttyACMx
+* tfmcu/+/cmd - Commands like up, down, stop
 
+    * The plus sign represents the ID of the shutter:
+```
+       tfmcu/23/cmd       # member 3 of group 2
+       tfmcu/102030/cmd   # 6 digit hex-ID
+       tfmcu/8090a023/cmd # 6 digit hex-ID + group + member
+```
+       
+* tfmcu/+/pct - percentages 100 for open, 0 for close
 
-### Problems
-  * the Linux package "modemmanager" may get in the way of accessing /dev/ttyACMx . I uninstalled that thing with "sudo apt remove modemmanager" because I don't have a modem and it was pretty annoying. Can be also disabled temporarily (use google).
+    * the plus sign means the same as in tfmcu/+/cmd above
+    
+    * currently only numbers 100 or 0 can be sent. All numbers between are rejected.
+
+* tfmcu/cli  - All CLI commands can be send here
+
+    * Don't terminate commands with a semicolon (like in USB-CLI)
+
+    * Don't send multiple commands at once separated by semicolon
+
+    * You can prepend all commands with the word "cli". This gives access to all
+    CLI commands. Only the commands send, timer, config can be used without the cli prefix.
+    
+
+#### MQTT Topics you can subscribe to:
+
+* tfmcu/config_out -  MCU-config data in JSON format
+
+* tfmcu/timer_out - Timer/automatic data  in JSON format

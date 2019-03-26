@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ################################################################################
 ## tfmenuconfig.py  - menu app to 
 ##       1) program firmware interactively
@@ -6,8 +7,17 @@
 ## Author: Bert Winkelmann <tf.zwiebert@online.de> (2019)
 ## License: GNU General Public License Version 3 (GNU GPL v3)
 ################################################################################
+import sys, os, serial, sys, re
+PYTHON2 = (sys.version_info < (3, 0))
 
-import ConfigParser, os, serial, sys, re
+if PYTHON2:
+    import ConfigParser as configparser
+else:
+    import configparser
+
+my_input = raw_input if PYTHON2 else input
+
+
 import serial.tools.list_ports as list_ports
 import subprocess
 
@@ -44,11 +54,12 @@ def _find_getch():
     return _getch
 getch = _find_getch()
 
+cfg = configparser.ConfigParser()
 cmd_fmt = 'config %s=%s;\n'
 ser = 0
-cfg = ConfigParser.ConfigParser()
 CONFIG_FILE = "config.ini"
 ANY = 0
+MCU_CFG_RETRY_N = 6
 
 ser_list = sorted(ports.device for ports in list_ports.comports())
 ser_port = ser_list[0] if len(ser_list) else "com1" if is_windows else "/dev/ttyUSB0"
@@ -149,23 +160,27 @@ def do_tfmcu_write_config_2(key, value):
     writes a tfmcu config key/value pair.
     """
     cmd = cmd_fmt % (key, value)
-    #print cmd
-    ser.write(cmd)
+    #print(cmd)
+    ser.write(cmd.encode('utf-8'))
     cmd = cmd_fmt % (key, "?")
-    ser.write(cmd)
+    ser.write(cmd.encode('utf-8'))
     lines = ser.readlines()
     for line in lines:
+        line = line.decode('utf-8')
         if line.startswith("tf: "):
-            #print line
+            #print(line)
             if (line.find(" "+key+"=") != -1 and line.find("="+value.strip('\"')+";") != -1):
                 return True                   
     return False
+
+def write_point(): sys.stdout.write('.'); sys.stdout.flush()
 
 def do_tfmcu_write_config(key, value):
     """
     writes a tfmcu config key/value pair and reports success or failure
     """
-    for i in range(4):
+    for i in range(MCU_CFG_RETRY_N):
+        write_point()
         if do_tfmcu_write_config_2(key, value):
             print("setting option "+key+" succeeded")
             return True
@@ -180,9 +195,9 @@ def do_tfmcu_write_config_all():
     try:
         ser = serial.Serial(c_flash["serial-port"], int(c_flash["serial-baud"]), timeout=1)
     except:
-        print "cannot open serial port " + ser_port
+        print("cannot open serial port " + ser_port)
         ser_list = sorted(ports.device for ports in list_ports.comports())
-        print ser_list
+        print(ser_list)
         return
     
     for key, value in c_mcu.items():
@@ -231,7 +246,7 @@ def press_enter():
     """
     wait for enter key before continue to let the user loog at the command output
     """
-    raw_input("\n<press enter to continue>")
+    my_input("\n<press enter to continue>")
 
 def ui_menu_serial():
     """
@@ -243,14 +258,14 @@ def ui_menu_serial():
     n = 0
     for port in ser_list:
         n += 1
-        msg_text += " %d) %s\n" % (n,port)
-    msg_text += " e) edit\n"
-    print msg_text
+        msg_text += " [%d] %s\n" % (n,port)
+    msg_text += " [e] edit\n"
+    print(msg_text)
     c = getch()
     try:
         if (c == 'e'):
-            print "serial port: %s" % (ser_port)
-            ser_port = raw_input("serial port: ")
+            print("serial port: %s" % (ser_port))
+            ser_port = my_input("serial port: ")
         else:
             ser_port = ser_list[int(c)-1]
     except: # nothing selected, cancel
@@ -277,50 +292,55 @@ def ui_verify_opt(key, value):
     """
     if key in opts_verify:
         if not opts_verify[key].match(value):
-            print "ERROR: invalid formatted value for key %s: %s" % (key, value)
+            print("ERROR: invalid formatted value for key %s: %s" % (key, value))
             if key in opts_help:
-                print "HELP: " + opts_help[key]
+                print("HELP: " + opts_help[key])
             press_enter()
             return False
     return True
 
+def menu_char_to_idx(c): return ord(c) - ord("a") # FIXME: start with numbers 1..9 then letters a...w
+def menu_idx_to_char(i): return chr(i+ord("a"))
 
 def ui_menu_opts(text, c_hash, proc_opts=0, ver_opts=0):
     """
     creates a user menu from the given function arguments
     """
-    c_list = c_hash.items()
+    c_items = list(c_hash.items())
+    changed = {}
     while (True):
         msg_text = (text+"\n"
-        " q) apply changes and leave menu\n"
-        " X) discard changes and leave menu\n"
+        " [y] apply changes and leave menu\n"
+        " [X] discard changes and leave menu\n"
         "\n")
         n = 0
-        for key, value in c_list:
+        for key, value in c_items:
+            msg_text += " [%s] %s (%s)\n" % (menu_idx_to_char(n), key, value)
             n += 1
-            msg_text += " %d) %s (%s)\n" % (n, key, value)
         print(msg_text)
         c = getch()
         if (c == "X"):
             return
-        elif (c == "q"):
-            for key, value in c_list:
-                c_hash[key] = value
+        elif (c == "y"):
+            for key in changed:
+                c_hash[key] = changed[key]
             return
         else:
             try:
-                key, value = c_list[int(c)-1]
+                idx = menu_char_to_idx(c)
+                key, value = c_items[idx]
                 s = ""
                 if key in opts_help:
-                    print "help: " + opts_help[key]
+                    print("help: " + opts_help[key])
                 if proc_opts:
                     s = proc_opts(key, value)
                 if not s:
-                    s = raw_input("Enter value for %s (%s): ..." % (key, value))
+                    s = my_input("Enter value for %s (%s): ..." % (key, value))
                 if s and ui_verify_opt(key, s) and (not ver_opts or ver_opts(key, s)):
-                    c_list[int(c)-1] = (key, s)
+                    c_items[idx] = (key, s)
+                    changed[key] = s
             except Exception as e:
-                print ("ex: %s" % e)
+                print("ex: %s" % e)
                 return
 
 ui_menu_txt = "\n\n\n\nPress key to choose menu item:\n"
@@ -331,20 +351,20 @@ def ui_menu_root():
     user main menu. should be called from an endless loop as long it returns True
     """
     print(ui_menu_txt+"\n"
-          " q) save config data to file and quit\n"
-          " X) discard config data and quit\n" 
-          " s) save configuration data but don't quit\n"
+          " [q] save config data to file and quit\n"
+          " [X] discard config data and quit\n" 
+          " [s] save configuration data but don't quit\n"
           "\n"
-          " i) find connected chips and print info\n"
-          " I) print info on chip at %s\n" % (c_flash["serial-port"])+
-          " f) configure flash options like serial-port, chip-type, etc\n"
-          " w) write flash (%s@%s). Writes the firmware\n" % (c_flash["chip"], c_flash["serial-port"])+
-          " e) erase flash (%s@%s). Usually not needed. Clears any data and firmware.\n" % (c_flash["chip"], c_flash["serial-port"])+
+          " [i] find connected chips and print info\n"
+          " [I] print info on chip at %s\n" % (c_flash["serial-port"])+
+          " [f] configure flash options like serial-port, chip-type, etc\n"
+          " [w] write flash (%s@%s). Writes the firmware\n" % (c_flash["chip"], c_flash["serial-port"])+
+          " [e] erase flash (%s@%s). Usually not needed. Clears any data and firmware.\n" % (c_flash["chip"], c_flash["serial-port"])+
           "\n"
-          " c) configure tronferno-mcu options like WLAN and MQTT login data\n"
-          " o) write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)\n"
+          " [c] configure tronferno-mcu options like WLAN and MQTT login data\n"
+          " [o] write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)\n"
           "\nShortcuts:\n"
-          " p) change serial port (%s)\n" % (c_flash["serial-port"])+
+          " [p] change serial port (%s)\n" % (c_flash["serial-port"])+
           "\n")
     c = getch()
     if   c == "p":

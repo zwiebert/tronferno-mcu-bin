@@ -18,10 +18,6 @@ ESP32_MK_FLAGS = DISTRO=1 BUILD_DIR_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_R
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
 FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
 
-
-#ATMEGA328_CO = c25106956f0390be7b5d7ddef5f92cac19734172
-#ATMEGA328_CO = e43ceccbd621e6cfc8847afe6f6436b7022a7062
-#ATMEGA328_CO = ec3374a68515502bc80e721a971b2995110ec7ec
 ATMEGA328_CO = e29af9767c6492f66b1fe99637737d14fd82d5b9
 .PHONY : all clean clean2 commit pull push distribute fetch_source
 .PHONY : esp32 pre_esp32 main_esp32 post_esp32
@@ -42,7 +38,7 @@ pre_esp8266:
 	make  $(ESP8266_MK_FLAGS) esp8266-clean
 main_esp8266:
 	make  $(ESP8266_MK_FLAGS) esp8266-all
-post_esp8266:
+post_esp8266: copy_docs
 	cp -p $(BUILD_BASE)/esp8266_firmware/eagle.flash.bin $(BUILD_BASE)/esp8266_firmware/eagle.irom0text.bin ~/esp/ESP8266_NONOS_SDK/bin/esp_init_data_default_v08.bin ./firmware/esp8266/
 
 
@@ -52,7 +48,7 @@ pre_esp32:
 	make  $(ESP32_MK_FLAGS) esp32-clean
 main_esp32: 
 	make -j  $(ESP32_MK_FLAGS) esp32-all
-post_esp32:
+post_esp32: copy_docs
 	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin ./firmware/esp32/
 
 pre_atmega328:
@@ -61,7 +57,7 @@ pre_atmega328:
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-clean
 main_atmega328:
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-all
-post_atmega328:
+post_atmega328: copy_avr_docs
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
 all:  esp8266 esp32 atmega328
@@ -84,11 +80,18 @@ pull :
 push :
 	git push
 
-.PHONY : windos
 
+# copy user docs from source repository
+.PHONY : copy_docs copy_avr_docs
+docs/%.md : $(TRONFERNO_MCU_ROOT)/docs/%.md
+	cp -p $< $@
+copy_docs : $(addprefix docs/, CLI.md ftron_data_format.md mcu_common.md mcu_esp32.md mcu_esp8266.md)
+copy_avr_docs : docs/mcu_atmega328.md
+
+
+# the following targets needs to be made on Windows system (git-bash is fine)
+.PHONY : windows
 windows: tools/esptool.exe  tools/dist/tfmenuconfig/tfmenuconfig.exe
-
-
 
 tools/esptool.exe: tools/esptool.py
 	cd tools && cmd '/C py2exe_esptool.cmd'
