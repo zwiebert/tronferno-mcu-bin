@@ -23,7 +23,7 @@ MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwieb
 ## Programming the Firmware and configure connection data
 
   1. Run menutool (menutool.sh on Linux) from main directory. 
-  It will give you an text based menu.
+  It will give you a text based menu.
   
   ```
 Press key to choose menu item:
@@ -150,6 +150,6 @@ writing firmware.  These must be run from main directory:
 
 #### MQTT Topics you can subscribe to:
 
-* MCU-config data will be posted at MQTT topic tfmcu/config_out in JSON format
+* tfmcu/config_out -  MCU-config data in JSON format
 
-* Timer/automatic data will be postet at MQTT topic tfmcu/timer_out in JSON format
+* tfmcu/timer_out - Timer/automatic data  in JSON format
