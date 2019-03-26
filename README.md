@@ -126,9 +126,11 @@ writing firmware.  These must be run from main directory:
 * tfmcu/+/cmd - Commands like up, down, stop
 
     * The plus sign represents the ID of the shutter:
+```
        tfmcu/23/cmd       # member 3 of group 2
        tfmcu/102030/cmd   # 6 digit hex-ID
        tfmcu/8090a023/cmd # 6 digit hex-ID + group + member
+```
        
 * tfmcu/+/pct - percentages 100 for open, 0 for close
 
