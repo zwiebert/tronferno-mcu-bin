@@ -146,7 +146,7 @@ writing firmware.  These must be run from main directory:
     CLI commands. Only the commands send, timer, config can be used without the cli prefix.
     
 
-
+#### MQTT Topics you can subscribe to:
 
 * MCU-config data will be posted at MQTT topic tfmcu/config_out in JSON format
 
