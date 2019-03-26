@@ -26,56 +26,58 @@ MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwieb
   It will give you an text based menu.
   
   ```
-  Press key to choose menu item:
-  
-   q) save config data to file and quit
-   X) discard config data and quit
-   s) save configuration data but don't quit
-  
-   i) find connected chips and print info
-   I) print info on chip at /dev/ttyUSB0
-   f) configure flash options like serial-port, chip-type, etc
-   w) write flash (esp32@/dev/ttyUSB0). Writes the firmware
-   e) erase flash (esp32@/dev/ttyUSB0). Usually not needed. Clears any data and firmware.
-  
-   c) configure tronferno-mcu options like WLAN and MQTT login data
-   o) write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)
-  
-  Shortcuts:
-   p) change serial port (/dev/ttyUSB0)
+Press key to choose menu item:
+
+ [q] save config data to file and quit
+ [X] discard config data and quit
+ [s] save configuration data but don't quit
+
+ [i] find connected chips and print info
+ [I] print info on chip at /dev/ttyUSB0
+ [f] configure flash options like serial-port, chip-type, etc
+ [w] write flash (esp8266@/dev/ttyUSB0). Writes the firmware
+ [e] erase flash (esp8266@/dev/ttyUSB0). Usually not needed. Clears any data and firmware.
+
+ [c] configure tronferno-mcu options like WLAN and MQTT login data
+ [o] write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)
+
+Shortcuts:
+ [p] change serial port (/dev/ttyUSB0)
    
   ```
   2. Connect your esp32 or esp8266 via USB
   3. Press 'i' to find the correct port
   4. Press 'f' to configure chip model (esp32/esp8266) and serial port
   ```
-  Press key to choose menu item:
-  
-   q) apply changes and leave menu
-   X) discard changes and leave menu
-  
-   1) chip (esp32)
-   2) flash-size (detect)
-   3) serial-baud (115200)
-   4) serial-port (/dev/ttyUSB0)
+Press key to choose menu item:
+
+ [y] apply changes and leave menu
+ [X] discard changes and leave menu
+
+ [a] chip (esp8266)
+ [b] flash-size (detect)
+ [c] serial-baud (115200)
+ [d] serial-port (/dev/ttyUSB0)
+
+Enter value for chip (esp8266): ...esp32
    
   ```
   5. If you want to erase the chip, press 'e'
   6. Press 'w' to write the firmware to chip
   7. Press 'c' to configure WLAN and MQTT login data
   ```
- Press key to choose menu item:
- 
-  q) apply changes and leave menu
-  X) discard changes and leave menu
- 
-  1) wlan-ssid ()
-  2) mqtt-user ()
-  3) mqtt-enable ()
-  4) mqtt-url ()
-  5) wlan-password ()
-  6) mqtt-password ()
- 
+Press key to choose menu item:
+
+ [y] apply changes and leave menu
+ [X] discard changes and leave menu
+
+ [a] wlan-ssid (xxxx)
+ [b] mqtt-user (xxxx)
+ [c] mqtt-enable (1)
+ [d] mqtt-url (mqtt://192.168.1.42:7777)
+ [e] wlan-password (xxxx)
+ [f] mqtt-password (xxxx)
+
  
   ```
   8. Press 'o' to write WLAN and MQTT login data to the chip

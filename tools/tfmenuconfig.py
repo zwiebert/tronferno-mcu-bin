@@ -258,8 +258,8 @@ def ui_menu_serial():
     n = 0
     for port in ser_list:
         n += 1
-        msg_text += " %d) %s\n" % (n,port)
-    msg_text += " e) edit\n"
+        msg_text += " [%d] %s\n" % (n,port)
+    msg_text += " [e] edit\n"
     print(msg_text)
     c = getch()
     try:
@@ -299,6 +299,8 @@ def ui_verify_opt(key, value):
             return False
     return True
 
+def menu_char_to_idx(c): return ord(c) - ord("a") # FIXME: start with numbers 1..9 then letters a...w
+def menu_idx_to_char(i): return chr(i+ord("a"))
 
 def ui_menu_opts(text, c_hash, proc_opts=0, ver_opts=0):
     """
@@ -308,24 +310,24 @@ def ui_menu_opts(text, c_hash, proc_opts=0, ver_opts=0):
     changed = {}
     while (True):
         msg_text = (text+"\n"
-        " q) apply changes and leave menu\n"
-        " X) discard changes and leave menu\n"
+        " [y] apply changes and leave menu\n"
+        " [X] discard changes and leave menu\n"
         "\n")
         n = 0
         for key, value in c_items:
+            msg_text += " [%s] %s (%s)\n" % (menu_idx_to_char(n), key, value)
             n += 1
-            msg_text += " %d) %s (%s)\n" % (n, key, value)
         print(msg_text)
         c = getch()
         if (c == "X"):
             return
-        elif (c == "q"):
+        elif (c == "y"):
             for key in changed:
                 c_hash[key] = changed[key]
             return
         else:
             try:
-                idx = int(c)-1
+                idx = menu_char_to_idx(c)
                 key, value = c_items[idx]
                 s = ""
                 if key in opts_help:
@@ -349,20 +351,20 @@ def ui_menu_root():
     user main menu. should be called from an endless loop as long it returns True
     """
     print(ui_menu_txt+"\n"
-          " q) save config data to file and quit\n"
-          " X) discard config data and quit\n" 
-          " s) save configuration data but don't quit\n"
+          " [q] save config data to file and quit\n"
+          " [X] discard config data and quit\n" 
+          " [s] save configuration data but don't quit\n"
           "\n"
-          " i) find connected chips and print info\n"
-          " I) print info on chip at %s\n" % (c_flash["serial-port"])+
-          " f) configure flash options like serial-port, chip-type, etc\n"
-          " w) write flash (%s@%s). Writes the firmware\n" % (c_flash["chip"], c_flash["serial-port"])+
-          " e) erase flash (%s@%s). Usually not needed. Clears any data and firmware.\n" % (c_flash["chip"], c_flash["serial-port"])+
+          " [i] find connected chips and print info\n"
+          " [I] print info on chip at %s\n" % (c_flash["serial-port"])+
+          " [f] configure flash options like serial-port, chip-type, etc\n"
+          " [w] write flash (%s@%s). Writes the firmware\n" % (c_flash["chip"], c_flash["serial-port"])+
+          " [e] erase flash (%s@%s). Usually not needed. Clears any data and firmware.\n" % (c_flash["chip"], c_flash["serial-port"])+
           "\n"
-          " c) configure tronferno-mcu options like WLAN and MQTT login data\n"
-          " o) write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)\n"
+          " [c] configure tronferno-mcu options like WLAN and MQTT login data\n"
+          " [o] write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)\n"
           "\nShortcuts:\n"
-          " p) change serial port (%s)\n" % (c_flash["serial-port"])+
+          " [p] change serial port (%s)\n" % (c_flash["serial-port"])+
           "\n")
     c = getch()
     if   c == "p":
