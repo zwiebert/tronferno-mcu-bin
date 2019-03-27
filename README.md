@@ -16,9 +16,31 @@ MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwieb
 
 ## Required Hardware
 
+  * 433 MHz RF transmitter (like FS1000A) to send commands.
+
+  * 433 MHz RF receiver (like RXB6) to receive commands.
+
   * ESP32, 4MB FLASH. (current main hardware for further development)
-  * ESP8266, 4MB FLASH. (deprecated, no MQTT support for now(?))
-  * ATMEGA328. (outdated firmware with limited features. No WLAN.)
+
+    * or: ESP8266, 4MB FLASH. (deprecated, no MQTT support for now(?))
+
+    * or: ATMEGA328. (outdated firmware with limited features. No WLAN.)
+
+(Please note, a super-regeneration receiver can disturb other
+receivers. This is the reason you should not place some 433 MHz power plugs near your 433 MHz shutter. A
+super-heterodyne receiver, like the RXB6, does not have this issue)
+
+
+## Related Repositories
+
+ * [tronferno-mcu-bin](https://github.com/zwiebert/tronferno-mcu-bin): Firmware binaries, tools and docs for end users
+
+ * [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu) Source distribution for developers
+
+ * [tronferno-fhem](https://github.com/zwiebert/tronferno-fhem): Perl module for integration into home server FHEM
+
+ * [tronferno-andro](https://github.com/zwiebert/tronferno-andro): Android App
+
 
 ## Programming the Firmware and configure connection data
 
