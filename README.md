@@ -10,39 +10,21 @@ MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwieb
   It aims to provide all functionality of the original programming central 2411, 
   but it also can do just plain up/down/stop commands, if you want just that.
   
-  * Command interfaces: USB, TCP, MQTT
+  * Command interfaces: USB, TCP, MQTT, HTTP
   * Supported by FHEM home server via specific module for USB connection
   * Can be integrated into homer servers via its MQTT interface
 
 ## Required Hardware
 
-  * 433 MHz RF transmitter (like FS1000A) to send commands.
-
-  * 433 MHz RF receiver (like RXB6) to receive commands.
-
   * ESP32, 4MB FLASH. (current main hardware for further development)
-
-    * or: ESP8266, 4MB FLASH. (deprecated, no MQTT support for now(?))
-
-    * or: ATMEGA328. (outdated firmware with limited features. No WLAN.)
-
-(Please note, a super-regeneration receiver can disturb other
-receivers. This is the reason you should not place some 433 MHz power plugs near your 433 MHz shutter. A
-super-heterodyne receiver, like the RXB6, does not have this issue)
-
-
-## Related Repositories
-
- * [tronferno-mcu-bin](https://github.com/zwiebert/tronferno-mcu-bin): Firmware binaries, tools and docs for end users
-
- * [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu) Source distribution for developers
-
- * [tronferno-fhem](https://github.com/zwiebert/tronferno-fhem): Perl module for integration into home server FHEM
-
- * [tronferno-andro](https://github.com/zwiebert/tronferno-andro): Android App
-
+  * ESP8266, 4MB FLASH. (deprecated, no MQTT support for now(?))
+  * ATMEGA328. (outdated firmware with limited features. No WLAN.)
 
 ## Programming the Firmware and configure connection data
+
+  * here you can flash the firmware and configure at least the
+    WIFI/WLAN login data. The reimaing configurain can be done in a
+    web browser. (see HTTP)
 
   1. Run menutool (menutool.sh on Linux) from main directory. 
   It will give you a text based menu.
@@ -136,11 +118,23 @@ writing firmware.  These must be run from main directory:
 
   * Use command  "help all;" to show all commands and options
   
+### HTTP
+
+* HTTP feature in Tronferno is new and still under development. It
+  will change. The beta-branch firmware may be needed for some
+  features described here.
+
+* After configuring WIFI/WLAN access you can enter the IP4-address of
+  the ESP32 into a web browser (javascript needs to be enabled)
+
+* currently, there you can configure the MCU options and send some
+  Fernotron commands
 
 ### MQTT
 
 * MQTT feature in Tronferno is new and still under development. It
-  will change. The beta-branch firmware may be needed for some features described here.
+  will change. The beta-branch firmware may be needed for some
+  features described here.
 
 
 #### MQTT Topics you can send to:
