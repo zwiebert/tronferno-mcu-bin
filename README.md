@@ -10,7 +10,7 @@ MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwieb
   It aims to provide all functionality of the original programming central 2411, 
   but it also can do just plain up/down/stop commands, if you want just that.
   
-  * Command interfaces: USB, TCP, MQTT
+  * Command interfaces: USB, TCP, MQTT, HTTP
   * Supported by FHEM home server via specific module for USB connection
   * Can be integrated into homer servers via its MQTT interface
 
@@ -21,6 +21,10 @@ MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwieb
   * ATMEGA328. (outdated firmware with limited features. No WLAN.)
 
 ## Programming the Firmware and configure connection data
+
+  * here you can flash the firmware and configure at least the
+    WIFI/WLAN login data. The reimaing configurain can be done in a
+    web browser. (see HTTP)
 
   1. Run menutool (menutool.sh on Linux) from main directory. 
   It will give you a text based menu.
@@ -114,6 +118,15 @@ writing firmware.  These must be run from main directory:
 
   * Use command  "help all;" to show all commands and options
   
+### HTTP
+
+* HTTP feature in Tronferno is new and still under development. It
+  will change. The beta-branch firmware may be needed for some features described here.
+
+  * After configuring WIFI/ACCESS you can enter the IP4-Address of the
+    ESP32 into a web browser (javascript needs to be enabled)
+
+ * currently, there you can configure the MCU options and send some Fernotron commands
 
 ### MQTT
 
