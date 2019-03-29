@@ -121,17 +121,20 @@ writing firmware.  These must be run from main directory:
 ### HTTP
 
 * HTTP feature in Tronferno is new and still under development. It
-  will change. The beta-branch firmware may be needed for some features described here.
+  will change. The beta-branch firmware may be needed for some
+  features described here.
 
-* After configuring WIFI/WLAN access you can enter the IP4-Address of the
-    ESP32 into a web browser (javascript needs to be enabled)
+* After configuring WIFI/WLAN access you can enter the IP4-address of
+  the ESP32 into a web browser (javascript needs to be enabled)
 
-* currently, there you can configure the MCU options and send some Fernotron commands
+* currently, there you can configure the MCU options and send some
+  Fernotron commands
 
 ### MQTT
 
 * MQTT feature in Tronferno is new and still under development. It
-  will change. The beta-branch firmware may be needed for some features described here.
+  will change. The beta-branch firmware may be needed for some
+  features described here.
 
 
 #### MQTT Topics you can send to:
