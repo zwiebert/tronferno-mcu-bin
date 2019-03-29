@@ -23,6 +23,7 @@ ATMEGA328_CO = e29af9767c6492f66b1fe99637737d14fd82d5b9
 .PHONY : esp32 pre_esp32 main_esp32 post_esp32
 .PHONY : esp8266 pre_esp8266 main_esp8266 post_esp8266
 .PHONY : atmega328 pre_atmega328 main_atmega328 post_atmega328
+.PHONY : co_master
 
 GIT_BRANCH ?= master
 
@@ -32,7 +33,12 @@ esp8266: pre_esp8266 main_esp8266 post_esp8266
 esp32: pre_esp32 main_esp32 post_esp32
 atmega328: pre_atmega328 main_atmega328 post_atmega328
 
-pre_esp8266:  
+co_master:
+	test -d tronferno-mcu || git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO)
+	cd $(TRONFERNO_MCU_ROOT) && git checkout --force master && git pull
+
+
+pre_esp8266: co_master 
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp8266
 	make  $(ESP8266_MK_FLAGS) esp8266-clean
@@ -42,7 +48,7 @@ post_esp8266: copy_docs
 	cp -p $(BUILD_BASE)/esp8266_firmware/eagle.flash.bin $(BUILD_BASE)/esp8266_firmware/eagle.irom0text.bin ~/esp/ESP8266_NONOS_SDK/bin/esp_init_data_default_v08.bin ./firmware/esp8266/
 
 
-pre_esp32:
+pre_esp32: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp32
 	make  $(ESP32_MK_FLAGS) esp32-clean
@@ -51,7 +57,7 @@ main_esp32:
 post_esp32: copy_docs
 	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin ./firmware/esp32/
 
-pre_atmega328:
+pre_atmega328: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_CO) &&  git clean -fd
 	mkdir -p firmware/atmega328
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-clean
