@@ -26,9 +26,13 @@ ATMEGA328_DOC_CO = 7904350e42f668603a721bc844ca3f4614186431
 .PHONY : atmega328 pre_atmega328 main_atmega328 post_atmega328
 .PHONY : co_master
 
-GIT_BRANCH ?= master
+GIT_BRANCH ?= $(shell git branch | grep \* | cut -d ' ' -f2)
 
 distribute : all commit push
+
+.PHONY : print_branch
+print_branch:
+	@echo ${GIT_BRANCH}
 
 esp8266: pre_esp8266 main_esp8266 post_esp8266
 esp32: pre_esp32 main_esp32 post_esp32
