@@ -64,30 +64,40 @@ MCU_CFG_RETRY_N = 6
 ser_list = sorted(ports.device for ports in list_ports.comports())
 ser_port = ser_list[0] if len(ser_list) else "com1" if is_windows else "/dev/ttyUSB0"
 
-c_mcu = {
-    "wlan-password":"",
-    "wlan-ssid":"",
-    "mqtt-enable":"",
-    "mqtt-url":"",
-    "mqtt-user":"",
-    "mqtt-password":"",
-}
+c_mcu_a = [
+    ("wlan-password",""),
+    ("wlan-ssid",""),
+    ("http-enable",""),
+    ("http-user",""),
+    ("http-password",""),
+    ("mqtt-enable",""),
+    ("mqtt-url",""),
+    ("mqtt-user",""),
+    ("mqtt-password",""),
+    ]
+
+c_mcu = dict (c_mcu_a)
+
 
 opts_verify = {
     "mqtt-url": re.compile("^mqtt://"),
     "mqtt-enable": re.compile("^[01]$"),
+    "http-enable": re.compile("^[01]$"),
 }
 opts_help = {
-    "mqtt-url": "example: mqtt-url = mqtt://192.168.1.42:7777",
-    "mqtt-enable": "set it to 0 or 1 for disable or enable",
+    "mqtt-url": "MQTT server/broker URL. example: mqtt-url = mqtt://192.168.1.42:7777",
+    "mqtt-enable": "set it to 0 or 1 for disable or enable MQTT client",
+    "http-enable": "set it to 0 or 1 for disable or enable HTTP server",
 }
 
-c_flash = {
-    "serial-port": ser_port,
-    "serial-baud": "115200",
-    "flash-size": "detect",
-    "chip": "esp32"   
-}
+c_flash_a = [
+    ("serial-port", ser_port),
+    ("serial-baud", "115200"),
+    ("flash-size", "detect"),
+    ("chip", "esp32"),   
+]
+
+c_flash = dict(c_flash_a)
     
 flash_files = {
     "esp32":   ["0x001000", "firmware/esp32/bootloader.bin",
@@ -302,11 +312,14 @@ def ui_verify_opt(key, value):
 def menu_char_to_idx(c): return ord(c) - ord("a") # FIXME: start with numbers 1..9 then letters a...w
 def menu_idx_to_char(i): return chr(i+ord("a"))
 
-def ui_menu_opts(text, c_hash, proc_opts=0, ver_opts=0):
+def ui_menu_opts(text, c_arr, c_hash, proc_opts=0, ver_opts=0):
     """
     creates a user menu from the given function arguments
     """
-    c_items = list(c_hash.items())
+    c_items = [];
+    for key, value in c_arr:
+        c_items.append(tuple([key, c_hash[key]]));
+
     changed = {}
     while (True):
         msg_text = (text+"\n"
@@ -370,7 +383,7 @@ def ui_menu_root():
     if   c == "p":
         port = ui_menu_serial()
         if port: c_flash["serial-port"] = port
-    elif c == "c": ui_menu_opts(ui_menu_txt, c_mcu, ver_opts=ui_verify_mcu_opts)
+    elif c == "c": ui_menu_opts(ui_menu_txt, c_mcu_a, c_mcu, ver_opts=ui_verify_mcu_opts)
     elif c == "o": do_tfmcu_write_config_all()
     elif c == "X": return False
     elif c == "e": do_esptool_erase_flash();   press_enter()
@@ -379,7 +392,7 @@ def ui_menu_root():
     elif c == "I": do_esptool_chip_id(c_flash["serial-port"])
     elif c == "s": do_app_config_save(CONFIG_FILE)
     elif c == "q": do_app_config_save(CONFIG_FILE); return
-    elif c == "f": ui_menu_opts(ui_menu_txt, c_flash, proc_opts=ui_process_flash_opts)
+    elif c == "f": ui_menu_opts(ui_menu_txt, c_flash_a, c_flash, proc_opts=ui_process_flash_opts)
     return True
 
 
