@@ -68,20 +68,22 @@ Enter value for chip (esp8266): ...esp32
   ```
   5. If you want to erase the chip, press 'e'
   6. Press 'w' to write the firmware to chip
-  7. Press 'c' to configure WLAN and MQTT login data
+  7. Press 'c' to configure WLAN, HTTP and MQTT login data. (Note: MQTT can also be configured later from Web-Interface, once WLAN is configured and HTTP enabled)
   ```
 Press key to choose menu item:
 
  [y] apply changes and leave menu
  [X] discard changes and leave menu
 
- [a] wlan-ssid (xxxx)
- [b] mqtt-user (xxxx)
- [c] mqtt-enable (1)
- [d] mqtt-url (mqtt://192.168.1.42:7777)
- [e] wlan-password (xxxx)
- [f] mqtt-password (xxxx)
-
+ [a] wlan-password (xxx)
+ [b] wlan-ssid (xxx)
+ [c] http-enable (1)
+ [d] http-user ()
+ [e] http-password ()
+ [f] mqtt-enable (1)
+ [g] mqtt-url (mqtt://192.168.1.42:7777)
+ [h] mqtt-user (xxx)
+ [i] mqtt-password (xxx)
  
   ```
   8. Press 'o' to write WLAN and MQTT login data to the chip
