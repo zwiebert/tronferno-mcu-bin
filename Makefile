@@ -56,7 +56,7 @@ post_esp8266: copy_docs
 pre_esp32: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp32
-	make  $(ESP32_MK_FLAGS) http_data esp32-clean
+	make  $(ESP32_MK_FLAGS) esp32-clean
 main_esp32: 
 	make -j  $(ESP32_MK_FLAGS) esp32-all
 post_esp32: copy_docs
