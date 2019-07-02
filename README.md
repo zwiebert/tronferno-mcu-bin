@@ -102,7 +102,7 @@ writing firmware.  These must be run from main directory:
 
 ## Wiring Radio transmitter (and receiver) to pins:
 
- * ESP32: RF-Transmitter=GPIO_17, RF-Receiver=GPIO_22
+ * ESP32: RF-Transmitter=GPIO_22, RF-Receiver=GPIO_17
 
  * ESP8266: RF-Transmitter=GPIO_4 (D2), RF-Receiver=GPIO_5 (D1)
 
