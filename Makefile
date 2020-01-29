@@ -36,6 +36,7 @@ print_branch:
 
 esp8266: pre_esp8266 main_esp8266 post_esp8266
 esp32: pre_esp32 main_esp32 post_esp32
+esp32lan: pre_esp32 main_esp32lan post_esp32lan
 atmega328: pre_atmega328 main_atmega328 post_atmega328
 
 co_master:
@@ -43,7 +44,7 @@ co_master:
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force master && git pull
 
 
-pre_esp8266: co_master 
+pre_esp8266: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp8266
 	make  $(ESP8266_MK_FLAGS) esp8266-clean
@@ -57,10 +58,14 @@ pre_esp32: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp32
 	make  $(ESP32_MK_FLAGS) esp32-clean
-main_esp32: 
+main_esp32:
 	make -j  $(ESP32_MK_FLAGS) esp32-all
 post_esp32: copy_docs
 	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin ./firmware/esp32/
+main_esp32lan:
+	make -j  $(ESP32_MK_FLAGS) FLAVOR_LAN=1 esp32-all
+post_esp32lan:
+	cp -p  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin  ./firmware/esp32/tronferno-mcu-lan.bin
 
 pre_atmega328: co_master copy_avr_docs
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_CO) &&  git clean -fd
@@ -68,14 +73,14 @@ pre_atmega328: co_master copy_avr_docs
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-clean
 main_atmega328:
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-all
-post_atmega328: 
+post_atmega328:
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
 .PHONY: atmega328_doc
 atmega328_doc: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_DOC_CO) &&  git clean -fd
 
-all:  esp8266 esp32 atmega328
+all:  esp8266 esp32 esp32lan atmega328
 
 
 clean:
@@ -113,4 +118,3 @@ tools/esptool.exe: tools/esptool.py
 
 tools/dist/tfmenuconfig/tfmenuconfig.exe: tools/tfmenuconfig.py
 	cd tools && winpty /c/Python27/Scripts/pyinstaller.exe -y tfmenuconfig.py
-
