@@ -102,7 +102,8 @@ c_flash = dict(c_flash_a)
 flash_files = {
     "esp32":   ["0x001000", "firmware/esp32/bootloader.bin",
                 "0x008000", "firmware/esp32/partitions.bin",
-                "0x010000", "firmware/esp32/tronferno-mcu.bin"],
+                "0x010000", "firmware/esp32/tronferno-mcu.bin",
+                "0x300000", "firmware/esp32/tronferno-mcu.bin"],
     "esp8266": ["0x000000", "firmware/esp8266/eagle.flash.bin",
                 "0x010000", "firmware/esp8266/eagle.irom0text.bin",
                 "0x3FC000", "firmware/esp8266/esp_init_data_default_v08.bin",
