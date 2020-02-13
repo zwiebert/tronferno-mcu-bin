@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ################################################################################
-## tfmenuconfig.py  - menu app to 
+## tfmenuconfig.py  - menu app to
 ##       1) program firmware interactively
 ##       2) configure WLAN and MQTT login data via serial port
 ##
@@ -94,16 +94,16 @@ c_flash_a = [
     ("serial-port", ser_port),
     ("serial-baud", "115200"),
     ("flash-size", "detect"),
-    ("chip", "esp32"),   
+    ("chip", "esp32"),
 ]
 
 c_flash = dict(c_flash_a)
-    
+
 flash_files = {
     "esp32":   ["0x001000", "firmware/esp32/bootloader.bin",
                 "0x008000", "firmware/esp32/partitions.bin",
                 "0x010000", "firmware/esp32/tronferno-mcu.bin",
-                "0x300000", "firmware/esp32/tronferno-mcu.bin"],
+                "0x300000", "firmware/esp32/ota_data_initial.bin"],
     "esp8266": ["0x000000", "firmware/esp8266/eagle.flash.bin",
                 "0x010000", "firmware/esp8266/eagle.irom0text.bin",
                 "0x3FC000", "firmware/esp8266/esp_init_data_default_v08.bin",
@@ -128,7 +128,7 @@ def do_esptool_write_flash():
         print('\nerror: %s' % e)
 
 
-   
+
 def do_esptool_erase_flash():
     args = ["--chip", c_flash["chip"],
             "--port", c_flash["serial-port"],
@@ -163,7 +163,7 @@ def do_esptool_chip_id(port=""):
         print('\nerror: %s' % e)
         press_enter()
 
-        
+
 
 
 def do_tfmcu_write_config_2(key, value):
@@ -181,7 +181,7 @@ def do_tfmcu_write_config_2(key, value):
         if line.startswith("tf: "):
             #print(line)
             if (line.find(" "+key+"=") != -1 and line.find("="+value.strip('\"')+";") != -1):
-                return True                   
+                return True
     return False
 
 def write_point(): sys.stdout.write('.'); sys.stdout.flush()
@@ -210,7 +210,7 @@ def do_tfmcu_write_config_all():
         ser_list = sorted(ports.device for ports in list_ports.comports())
         print(ser_list)
         return
-    
+
     for key, value in c_mcu.items():
         if (key.find("-password") != -1):
             do_tfmcu_write_config_2(key, value)
@@ -233,7 +233,7 @@ def do_app_config_save(path):
         cfg.set('FLASH', key, value)
     cfg.write(cf)
     cf.close()
-    
+
 def do_app_config_read(path):
     """
     reads user configured data to file PATH
@@ -366,7 +366,7 @@ def ui_menu_root():
     """
     print(ui_menu_txt+"\n"
           " [q] save config data to file and quit\n"
-          " [X] discard config data and quit\n" 
+          " [X] discard config data and quit\n"
           " [s] save configuration data but don't quit\n"
           "\n"
           " [i] find connected chips and print info\n"
