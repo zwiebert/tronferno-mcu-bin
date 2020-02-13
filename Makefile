@@ -61,7 +61,7 @@ pre_esp32: co_master
 main_esp32:
 	make -j  $(ESP32_MK_FLAGS) esp32-all
 post_esp32: copy_docs
-	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin ./firmware/esp32/
+	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin $(BUILD_BASE)/esp32_build/ota_data_initial.bin ./firmware/esp32/
 main_esp32lan:
 	make -j  $(ESP32_MK_FLAGS) FLAVOR_LAN=1 esp32-all
 post_esp32lan:
