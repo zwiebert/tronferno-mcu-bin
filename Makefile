@@ -28,7 +28,7 @@ ATMEGA328_DOC_CO = 7904350e42f668603a721bc844ca3f4614186431
 
 GIT_BRANCH ?= $(shell git branch | grep \* | cut -d ' ' -f2)
 
-distribute : all commit push
+distribute : clean all commit push
 
 .PHONY : print_branch
 print_branch:
@@ -85,7 +85,7 @@ all:  esp8266 esp32 esp32lan atmega328
 
 
 clean:
-	rm -r tmp
+	-rm -r tmp 
 
 clean2:
 	$(MAKE) $(ESP8266_MK_FLAGS) esp8266-clean
