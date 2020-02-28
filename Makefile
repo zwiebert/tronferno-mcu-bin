@@ -15,6 +15,9 @@ AVR_MK_FLAGS = DISTRO=1 FW_BASE=$(AVR_FW_DIR) BUILD_BASE=$(AVR_BUILD_DIR) -C $(T
 ESP32_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_build
 ESP32_MK_FLAGS = DISTRO=1 BUILD_DIR_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
+ESP32_TEST_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_test_build
+ESP32_TEST_MK_FLAGS = TEST_BUILD_DIR_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
+
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
 FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
 
@@ -35,7 +38,8 @@ print_branch:
 	@echo ${GIT_BRANCH}
 
 esp8266: pre_esp8266 main_esp8266 post_esp8266
-esp32: pre_esp32 main_esp32 post_esp32
+esp32: pre_esp32 test_esp32 main_esp32 post_esp32
+esp32_test: pre_esp32 test_esp32
 esp32lan: pre_esp32 main_esp32lan post_esp32lan
 atmega328: pre_atmega328 main_atmega328 post_atmega328
 
@@ -58,6 +62,8 @@ pre_esp32: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp32
 	make  $(ESP32_MK_FLAGS) esp32-clean
+test_esp32:
+	make $(ESP32_TEST_MK_FLAGS) esp32-test-clean esp32-test-flash esp32-test-run
 main_esp32:
 	make -j  $(ESP32_MK_FLAGS) esp32-all
 post_esp32: copy_docs
@@ -85,7 +91,7 @@ all:  esp8266 esp32 esp32lan atmega328
 
 
 clean:
-	-rm -r tmp 
+	-rm -r tmp
 
 clean2:
 	$(MAKE) $(ESP8266_MK_FLAGS) esp8266-clean
