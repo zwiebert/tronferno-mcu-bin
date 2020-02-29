@@ -92,6 +92,7 @@ all:  esp8266 esp32 esp32lan atmega328
 
 clean:
 	-rm -r tmp
+	-rm -r tronferno-mcu/unity
 
 clean2:
 	$(MAKE) $(ESP8266_MK_FLAGS) esp8266-clean
