@@ -1,54 +1,179 @@
-# tronferno-mcu
+# Tronferno / tronferno-mcu-bin
 
-  Tronferno is a firmware to turn an ESP32 MCU board into an hardware
-  dongle to control Fernotron devices (usually shutters).
+MCU firmware binary, tools and docs for [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu).
 
-  It aims to provide all functionality of the original programming
-  central 2411, but it also can do just plain up/down/stop commands,
-  if you want just that.
+## Overview
 
-  * Command interfaces: [CLI](docs/CLI.md) at USB or TCP/IP, [Webserver](docs/webserver.md) at [HTTP](docs/http.md), MQTT
+  Tronferno is a firmware to turn an ESP32 MCU board into an hardware dongle
+  to control Fernotron devices (usually shutters).
 
-  * Supported by FHEM home server via specific module for USB
-    connection
+  It aims to provide all functionality of the original programming central 2411,
+  but it also can do just plain up/down/stop commands, if you want just that.
 
+  * Command interfaces: USB, TCP, MQTT, HTTP
+  * Supported by FHEM home server via specific module for USB connection
   * Can be integrated into homer servers via its MQTT interface
-
-  * Android App available
-
 
 ## Required Hardware
 
-See the [hardware](hardware.md) document.
+  * ESP32, 4MB FLASH. (current main hardware for further development)
+  * ESP8266, 4MB FLASH. (deprecated, no MQTT support for now(?))
+  * ATMEGA328. (outdated firmware with limited features. No WLAN.)
+
+## Programming the Firmware and configure connection data
+
+  * here you can flash the firmware and configure at least the
+    WIFI/WLAN login data. The reimaing configurain can be done in a
+    web browser. (see HTTP)
+
+  1. Run menutool (menutool.sh on Linux) from main directory.
+  It will give you a text based menu.
+
+  ```
+Press key to choose menu item:
+
+ [q] save config data to file and quit
+ [X] discard config data and quit
+ [s] save configuration data but don't quit
+
+ [i] find connected chips and print info
+ [I] print info on chip at /dev/ttyUSB0
+ [f] configure flash options like serial-port, chip-type, etc
+ [w] write flash (esp8266@/dev/ttyUSB0). Writes the firmware
+ [e] erase flash (esp8266@/dev/ttyUSB0). Usually not needed. Clears any data and firmware.
+
+ [c] configure tronferno-mcu options like WLAN and MQTT login data
+ [o] write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)
+
+Shortcuts:
+ [p] change serial port (/dev/ttyUSB0)
+
+  ```
+  2. Connect your esp32 or esp8266 via USB
+  3. Press 'i' to find the correct port
+  4. Press 'f' to configure chip model (esp32/esp8266) and serial port
+  ```
+Press key to choose menu item:
+
+ [y] apply changes and leave menu
+ [X] discard changes and leave menu
+
+ [a] chip (esp8266)
+ [b] flash-size (detect)
+ [c] serial-baud (115200)
+ [d] serial-port (/dev/ttyUSB0)
+
+Enter value for chip (esp8266): ...esp32
+
+  ```
+  5. If you want to erase the chip, press 'e'
+  6. Press 'w' to write the firmware to chip
+  7. Press 'c' to configure WLAN, HTTP and MQTT login data. (Note: MQTT can also be configured later from Web-Interface, once WLAN is configured and HTTP enabled)
+  ```
+Press key to choose menu item:
+
+ [y] apply changes and leave menu
+ [X] discard changes and leave menu
+
+ [a] wlan-password (xxx)
+ [b] wlan-ssid (xxx)
+ [c] http-enable (1)
+ [d] http-user ()
+ [e] http-password ()
+ [f] mqtt-enable (1)
+ [g] mqtt-url (mqtt://192.168.1.42:7777)
+ [h] mqtt-user (xxx)
+ [i] mqtt-password (xxx)
+
+  ```
+  8. Press 'o' to write WLAN and MQTT login data to the chip
+
+Alternatively there are scripts (both Linux and Windows versions) for
+writing firmware.  These must be run from main directory:
+```
+  ~/tronferno-mcu-bin$ sh ./flash_esp32.sh /dev/ttyUSB0
+ ```
+ ```
+  C:\tronferno-mcu-bin> flash_esp8266 COM3
+```
+```
+  ~/tronferno-mcu-bin$ sh ./flash_atmega328.sh /dev/ttyACM0
+```
+
+## Wiring Radio transmitter (and receiver) to pins:
+
+ * ESP32: RF-Transmitter=GPIO_22, RF-Receiver=GPIO_17
+
+ * ESP8266: RF-Transmitter=GPIO_4 (D2), RF-Receiver=GPIO_5 (D1)
+
+ * ATMEGA328:  RF-Transmitter=PB3 (D11), RF-Receiver=PD2 (D2)
 
 
-## Related Repositories
+## Plain old Commandline Interface
+  * CLI can be used via USB-Terminal or WiFi-Terminal at TCP Port 7777
 
- * [tronferno-mcu-bin](https://github.com/zwiebert/tronferno-mcu-bin): Firmware binaries, tools and docs for end users
+  * commands are terminated with semicolon. A newline is not required.
 
- * [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu) Source distribution for developers
+  * Use local echo
 
- * [tronferno-fhem](https://github.com/zwiebert/tronferno-fhem): Perl module for integration into home server FHEM
+  * Backspace key can be used.
 
- * [tronferno-andro](https://github.com/zwiebert/tronferno-andro): Android App
+  * Use command  "help all;" to show all commands and options
 
-
-### Documentation
-
-  * Quickstart-Manual: [deutsch](docs/starter-de.md)
-
-  * [CLI reference manual](https://github.com/zwiebert/tronferno-mcu/blob/master/docs/CLI.md) in the docs folder.
-
-  * Buld/Flash information: [docs](https://github.com/zwiebert/tronferno-mcu/blob/master/docs/)/mcu_*.md
+  * command lines can also be sent in JSON format
+```
+       {"name":"tfmcu", "config":{ "verbose":4, "http-enable":1 }}
+```
 
 
-### History
- * 2020: shutter positions in percent implemented
- * 2018: Moving to ESP32/esp-idf
- * 2017: Moving to ESP8266/NonOS
- * 2017: Moved to ATmega328p. Support for timer programming.
- * 2011: First version on ATmega168/AVRStudio. Limited to plain commands up/down/stop/...
+### HTTP
 
-### Project Author
+* A builtin web server to configure options and control/program shutters
 
-Bert Winkelmann <tf.zwiebert@online.de>
+* This feature in Tronferno is new and still under development. It
+  will change. It may only work in beta-branch firmware.
+
+
+* After gaining WIFI/WLAN access by using menutool, you can acces the
+  MCU by entering the IP4-address of the ESP32 into a web browser
+  (javascript needs to be enabled)
+
+### MQTT
+
+* MQTT feature in Tronferno is new and still under development. It
+  will change.  It may only work in beta-branch firmware.
+
+#### MQTT Topics you can send to:
+
+* tfmcu/+/cmd - Commands like up, down, stop
+
+    * The plus sign represents the ID of the shutter:
+```
+       tfmcu/23/cmd       # member 3 of group 2
+       tfmcu/102030/cmd   # 6 digit hex-ID
+       tfmcu/8090a023/cmd # 6 digit hex-ID + group + member
+```
+
+* tfmcu/+/pct - percentages 100 for open, 0 for close
+
+    * the plus sign means the same as in tfmcu/+/cmd above
+
+    * currently only numbers 100 or 0 can be sent. All numbers between are rejected.
+
+* tfmcu/cli  - All CLI commands can be send here
+
+    * Don't terminate commands with a semicolon (like in USB-CLI)
+
+    * Don't send multiple commands at once separated by semicolon
+
+    * You can prepend all commands with the word "cli". This gives access to all
+    CLI commands. Only the commands send, timer, config can be used without the cli prefix.
+
+
+#### MQTT Topics you can subscribe to:
+
+* tfmcu/config_out -  MCU-config data in JSON format
+
+* tfmcu/timer_out - Timer/automatic data  in JSON format
+
+* tfmcu/+/pct_out - current shutter position in percent (+ stands for shutter ID)

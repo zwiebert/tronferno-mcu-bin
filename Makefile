@@ -120,7 +120,7 @@ docs/img/%.png : $(TRONFERNO_MCU_ROOT)/docs/img/%.png
 	cp -p $< $@
 #copy_docs : $(addprefix docs/, CLI.md ftron_data_format.md mcu_common.md mcu_esp32.md mcu_esp8266.md webserver.md img/tfmcu_fw.png img/tfmcu_auto.png img/tfmcu_pos.png img/tfmcu_cmd.png img/tfmcu_config.png)
 copy_docs : $(docs) $(imgs)
-	cp -p $(TRONFERNO_MCU_ROOT)/README.md .
+	cp -p $(TRONFERNO_MCU_ROOT)/README.md ./README_src.md
 copy_avr_docs : atmega328_doc docs/mcu_atmega328.md
 print_docs:
 	@echo $(docs) $(imgs)
