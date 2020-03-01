@@ -1,7 +1,10 @@
+### tfmenutool.py
 
-  * here you can flash the firmware and configure at least the
-    WIFI/WLAN login data. The reimaing configurain can be done in a
-    web browser. (see HTTP)
+  * This tools lets you flash the firmware and allows you to configure basic options like
+    WIFI/WLAN login data. The remaining configurain can be done in a
+    web browser. You can also set the basic configuration by connection into the builtin [LAN Accesspoint](network.md).
+
+  * see also [network](network.md), [config](mcu_config.md)
 
   1. Run menutool (menutool.sh on Linux) from main directory.
   It will give you a text based menu.
