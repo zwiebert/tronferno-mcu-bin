@@ -12,8 +12,11 @@ AVR_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/atmega328_build
 AVR_MK_FLAGS = DISTRO=1 FW_BASE=$(AVR_FW_DIR) BUILD_BASE=$(AVR_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 
-ESP32_BUILD_DIR = ../../../$(BUILD_BASE)/esp32_build
+ESP32_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_build
 ESP32_MK_FLAGS = DISTRO=1 BUILD_DIR_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
+
+ESP32_TEST_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_test_build
+ESP32_TEST_MK_FLAGS = TEST_BUILD_DIR_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
 FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
@@ -28,14 +31,15 @@ ATMEGA328_DOC_CO = 7904350e42f668603a721bc844ca3f4614186431
 
 GIT_BRANCH ?= $(shell git branch | grep \* | cut -d ' ' -f2)
 
-distribute : all commit push
+distribute : clean all commit push
 
 .PHONY : print_branch
 print_branch:
 	@echo ${GIT_BRANCH}
 
 esp8266: pre_esp8266 main_esp8266 post_esp8266
-esp32: pre_esp32 main_esp32 post_esp32
+esp32: pre_esp32 test_esp32 main_esp32 post_esp32
+esp32_test: pre_esp32 test_esp32
 esp32lan: pre_esp32 main_esp32lan post_esp32lan
 atmega328: pre_atmega328 main_atmega328 post_atmega328
 
@@ -58,14 +62,17 @@ pre_esp32: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp32
 	make  $(ESP32_MK_FLAGS) esp32-clean
+test_esp32:
+	make $(ESP32_TEST_MK_FLAGS) esp32-test-clean esp32-test-flash esp32-test-run
 main_esp32:
 	make -j  $(ESP32_MK_FLAGS) esp32-all
 post_esp32: copy_docs
-	cp -p  $(BUILD_BASE)/esp32_build/bootloader/bootloader.bin  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin $(BUILD_BASE)/esp32_build/partitions.bin  $(BUILD_BASE)/esp32_build/ota_data_initial.bin ./firmware/esp32/
+	cp -p $(ESP32_BUILD_DIR)/bootloader/bootloader.bin  $(ESP32_BUILD_DIR)/tronferno-mcu.bin $(ESP32_BUILD_DIR)/ota_data_initial.bin ./firmware/esp32/
+	cp -p $(ESP32_BUILD_DIR)/partition_table/partition-table.bin ./firmware/esp32/partitions.bin
 main_esp32lan:
 	make -j  $(ESP32_MK_FLAGS) FLAVOR_LAN=1 esp32-all
 post_esp32lan:
-	cp -p  $(BUILD_BASE)/esp32_build/tronferno-mcu.bin  ./firmware/esp32/tronferno-mcu-lan.bin
+	cp -p  $(ESP32_BUILD_DIR)/tronferno-mcu.bin  ./firmware/esp32/tronferno-mcu-lan.bin
 
 pre_atmega328: co_master copy_avr_docs
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_CO) &&  git clean -fd
@@ -84,7 +91,8 @@ all:  esp8266 esp32 esp32lan atmega328
 
 
 clean:
-	rm -r tmp
+	-rm -r tmp
+	-rm -r tronferno-mcu/unity
 
 clean2:
 	$(MAKE) $(ESP8266_MK_FLAGS) esp8266-clean
@@ -105,7 +113,9 @@ push :
 .PHONY : copy_docs copy_avr_docs
 docs/%.md : $(TRONFERNO_MCU_ROOT)/docs/%.md
 	cp -p $< $@
-copy_docs : $(addprefix docs/, CLI.md ftron_data_format.md mcu_common.md mcu_esp32.md mcu_esp8266.md)
+docs/img/%.png : $(TRONFERNO_MCU_ROOT)/docs/img/%.png
+	cp -p $< $@
+copy_docs : $(addprefix docs/, CLI.md ftron_data_format.md mcu_common.md mcu_esp32.md mcu_esp8266.md webserver.md img/tfmcu_fw.png img/tfmcu_auto.png img/tfmcu_pos.png img/tfmcu_cmd.png img/tfmcu_config.png)
 copy_avr_docs : atmega328_doc docs/mcu_atmega328.md
 
 
