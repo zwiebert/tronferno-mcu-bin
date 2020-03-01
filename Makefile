@@ -113,7 +113,9 @@ push :
 .PHONY : copy_docs copy_avr_docs
 docs/%.md : $(TRONFERNO_MCU_ROOT)/docs/%.md
 	cp -p $< $@
-copy_docs : $(addprefix docs/, CLI.md ftron_data_format.md mcu_common.md mcu_esp32.md mcu_esp8266.md)
+docs/img/%.png : $(TRONFERNO_MCU_ROOT)/docs/img/%.png
+	cp -p $< $@
+copy_docs : $(addprefix docs/, CLI.md ftron_data_format.md mcu_common.md mcu_esp32.md mcu_esp8266.md webserver.md img/tfmcu_fw.png img/tfmcu_auto.png img/tfmcu_pos.png img/tfmcu_cmd.png img/tfmcu_config.png)
 copy_avr_docs : atmega328_doc docs/mcu_atmega328.md
 
 
