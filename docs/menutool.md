@@ -2,7 +2,7 @@
 
   * This tools lets you flash the firmware and allows you to configure basic options like
     WIFI/WLAN login data. The remaining configuration can be done in a
-    web browser. You can also set the basic configuration by Web-Browser if you connect to the built-in [LAN Accesspoint](network.md).
+    web browser. You can also set the basic [configuration](mcu_config.md) by [web-browser](webserver.md) if you connect to the built-in [LAN access-point](network.md).
 
   * see also [network](network.md), [config](mcu_config.md)
 
