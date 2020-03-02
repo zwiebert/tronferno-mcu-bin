@@ -74,13 +74,13 @@ main_esp32lan:
 post_esp32lan:
 	cp -p  $(ESP32_BUILD_DIR)/tronferno-mcu.bin  ./firmware/esp32/tronferno-mcu-lan.bin
 
-pre_atmega328: co_master copy_avr_docs
+pre_atmega328: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_CO) &&  git clean -fd
 	mkdir -p firmware/atmega328
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-clean
 main_atmega328:
 	$(MAKE)  $(AVR_MK_FLAGS) atmega328-all
-post_atmega328:
+post_atmega328: copy_avr_docs
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
 .PHONY: atmega328_doc
@@ -111,7 +111,7 @@ push :
 
 # copy user docs from source repository
 docs = $(shell cd  $(TRONFERNO_MCU_ROOT) && ls docs/*.md)
-imgs = $(shell cd  $(TRONFERNO_MCU_ROOT) && ls docs/img/*.png)
+imgs = $(shell cd  $(TRONFERNO_MCU_ROOT) && test -d docs/img && ls docs/img/*.png)
 .PHONY : copy_docs copy_avr_docs
 docs/%.md : $(TRONFERNO_MCU_ROOT)/docs/%.md
 	cp -p $< $@
