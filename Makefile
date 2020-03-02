@@ -111,7 +111,7 @@ push :
 
 # copy user docs from source repository
 docs = $(shell cd  $(TRONFERNO_MCU_ROOT) && ls docs/*.md)
-imgs = $(shell cd  $(TRONFERNO_MCU_ROOT) && ls docs/img/*.png)
+imgs = $(shell cd  $(TRONFERNO_MCU_ROOT) && test -d docs/img && ls docs/img/*.png)
 .PHONY : copy_docs copy_avr_docs
 docs/%.md : $(TRONFERNO_MCU_ROOT)/docs/%.md
 	cp -p $< $@
