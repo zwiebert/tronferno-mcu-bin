@@ -65,7 +65,7 @@ pre_esp32: co_master
 	mkdir -p firmware/esp32
 	make  $(ESP32_MK_FLAGS) esp32-clean
 test_esp32:
-	make $(ESP32_TEST_MK_FLAGS) esp32-test-clean esp32-test-flash esp32-test-run
+	make $(ESP32_TEST_MK_FLAGS) esp32-test-clean esp32-test-build esp32-test-flash esp32-test-run
 main_esp32:
 	make -j  $(ESP32_MK_FLAGS) esp32-all
 post_esp32: copy_docs
