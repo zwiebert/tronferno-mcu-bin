@@ -30,6 +30,8 @@ ATMEGA328_DOC_CO = 7904350e42f668603a721bc844ca3f4614186431
 .PHONY : co_master
 
 GIT_BRANCH ?= $(shell git branch | grep \* | cut -d ' ' -f2)
+APP_VERSION ?=  $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app/include/app/proj_app_cfg.h)
+
 
 distribute : clean all commit push
 
@@ -44,8 +46,8 @@ esp32lan: pre_esp32 main_esp32lan post_esp32lan
 atmega328: pre_atmega328 main_atmega328 post_atmega328
 
 co_master:
-	test -d tronferno-mcu || git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO)
-	cd $(TRONFERNO_MCU_ROOT) && git checkout --force master && git pull
+	-rm -rf $(THIS_ROOT)/$(TRONFERNO_MCU_ROOT)
+	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
 
 
 pre_esp8266: co_master
@@ -100,7 +102,7 @@ clean2:
 	$(MAKE) $(ESP32_MK_FLAGS) esp32-clean
 
 commit :
-	git commit -a -m "new binaries"
+	git commit -a -m "Version $(APP_VERSION) ($(GIT_BRANCH))"
 
 pull :
 	git pull
