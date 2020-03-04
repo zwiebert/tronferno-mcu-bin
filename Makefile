@@ -30,7 +30,6 @@ ATMEGA328_DOC_CO = 7904350e42f668603a721bc844ca3f4614186431
 .PHONY : co_master
 
 GIT_BRANCH ?= $(shell git branch | grep \* | cut -d ' ' -f2)
-APP_VERSION ?=  $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app/include/app/proj_app_cfg.h)
 
 
 distribute : clean all commit push
@@ -48,6 +47,7 @@ atmega328: pre_atmega328 main_atmega328 post_atmega328
 co_master:
 	-rm -rf $(THIS_ROOT)/$(TRONFERNO_MCU_ROOT)
 	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
+	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app/include/app/proj_app_cfg.h))
 
 
 pre_esp8266: co_master
