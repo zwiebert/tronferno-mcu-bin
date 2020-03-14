@@ -13,10 +13,10 @@ AVR_MK_FLAGS = DISTRO=1 FW_BASE=$(AVR_FW_DIR) BUILD_BASE=$(AVR_BUILD_DIR) -C $(T
 
 
 ESP32_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_build
-ESP32_MK_FLAGS = DISTRO=1 BUILD_DIR_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
+ESP32_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 ESP32_TEST_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_test_build
-ESP32_TEST_MK_FLAGS = TEST_BUILD_DIR_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
+ESP32_TEST_MK_FLAGS = BUILD_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
 FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
@@ -39,7 +39,7 @@ print_branch:
 	@echo ${GIT_BRANCH}
 
 esp8266: pre_esp8266 main_esp8266 post_esp8266
-esp32: pre_esp32 test_esp32 main_esp32 post_esp32
+esp32: pre_esp32 main_esp32 post_esp32
 esp32_test: pre_esp32 test_esp32
 esp32lan: pre_esp32 main_esp32lan post_esp32lan
 atmega328: pre_atmega328 main_atmega328 post_atmega328
@@ -79,9 +79,9 @@ post_esp32lan:
 pre_atmega328: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_CO) &&  git clean -fd
 	mkdir -p firmware/atmega328
-	$(MAKE)  $(AVR_MK_FLAGS) atmega328-clean
+	make  $(AVR_MK_FLAGS) atmega328-clean
 main_atmega328:
-	$(MAKE)  $(AVR_MK_FLAGS) atmega328-all
+	make  $(AVR_MK_FLAGS) atmega328-all
 post_atmega328: copy_avr_docs
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
@@ -89,7 +89,7 @@ post_atmega328: copy_avr_docs
 atmega328_doc: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_DOC_CO) &&  git clean -fd
 
-all:  esp8266 esp32 esp32lan atmega328
+all:  esp8266 esp32_test esp32 esp32lan atmega328
 
 
 clean:
@@ -97,9 +97,9 @@ clean:
 	-rm -r tronferno-mcu/unity
 
 clean2:
-	$(MAKE) $(ESP8266_MK_FLAGS) esp8266-clean
-	$(MAKE) $(AVR_MK_FLAGS) atmega328-clean
-	$(MAKE) $(ESP32_MK_FLAGS) esp32-clean
+	make $(ESP8266_MK_FLAGS) esp8266-clean
+	make $(AVR_MK_FLAGS) atmega328-clean
+	make $(ESP32_MK_FLAGS) esp32-clean
 
 commit :
 	git commit -a -m "Version $(APP_VERSION) ($(GIT_BRANCH))"
