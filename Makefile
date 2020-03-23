@@ -1,8 +1,9 @@
 
-THIS_ROOT = $(HOME)/proj/mcu/tronferno-mcu-bin
+THIS_ROOT := $(realpath .)
 TRONFERNO_MCU_ROOT = ./tronferno-mcu
 BUILD_BASE = tmp
-TRONFERNO_MCU_REPO = $(HOME)/proj/mcu/tronferno-mcu
+TRONFERNO_MCU_REPO := $(realpath ../tronferno-mcu)
+COMPONENTS_MCU_REPO := $(realpath ../components-mcu)
 
 ESP8266_MK_FLAGS = DISTRO=1 FW_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_firmware BUILD_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_build -C $(TRONFERNO_MCU_ROOT)
 
@@ -48,7 +49,7 @@ co_master:
 	-rm -rf $(THIS_ROOT)/$(TRONFERNO_MCU_ROOT)
 	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
 	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app/include/app/proj_app_cfg.h))
-
+	mkdir -p $(TRONFERNO_MCU_ROOT)/local && cd $(TRONFERNO_MCU_ROOT)/local &&  git clone --local --no-hardlinks $(COMPONENTS_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
 
 pre_esp8266: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
