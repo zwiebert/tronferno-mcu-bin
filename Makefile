@@ -48,8 +48,10 @@ atmega328: pre_atmega328 main_atmega328 post_atmega328
 co_master:
 	-rm -rf $(THIS_ROOT)/$(TRONFERNO_MCU_ROOT)
 	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
+	git -C $(TRONFERNO_MCU_ROOT) submodule update --init --recursive
 	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app/include/app/proj_app_cfg.h))
 	mkdir -p $(TRONFERNO_MCU_ROOT)/local && cd $(TRONFERNO_MCU_ROOT)/local &&  git clone --local --no-hardlinks $(COMPONENTS_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
+	git -C $(TRONFERNO_MCU_ROOT)/local/components-mcu submodule update --init --recursive
 
 pre_esp8266: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
@@ -67,6 +69,8 @@ pre_esp32: co_master
 	make  $(ESP32_MK_FLAGS) esp32-clean
 test_esp32:
 	make $(ESP32_TEST_MK_FLAGS) esp32-test-clean esp32-test-build esp32-test-flash esp32-test-run
+test_host:
+	make $(ESP32_TEST_MK_FLAGS) host-test-all
 main_esp32:
 	make -j  $(ESP32_MK_FLAGS) esp32-all
 post_esp32: copy_docs
@@ -90,7 +94,7 @@ post_atmega328: copy_avr_docs
 atmega328_doc: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_DOC_CO) &&  git clean -fd
 
-all:  esp8266 esp32_test esp32 esp32lan atmega328
+all:  esp8266 test_host esp32 esp32lan atmega328
 
 
 clean:
