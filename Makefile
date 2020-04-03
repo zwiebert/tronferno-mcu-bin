@@ -1,4 +1,3 @@
-
 THIS_ROOT := $(realpath .)
 TRONFERNO_MCU_ROOT = ./tronferno-mcu
 BUILD_BASE = tmp
@@ -48,10 +47,10 @@ atmega328: pre_atmega328 main_atmega328 post_atmega328
 co_master:
 	-rm -rf $(THIS_ROOT)/$(TRONFERNO_MCU_ROOT)
 	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
-	git -C $(TRONFERNO_MCU_ROOT) submodule update --init --recursive
-	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app/include/app/proj_app_cfg.h))
-	mkdir -p $(TRONFERNO_MCU_ROOT)/local && cd $(TRONFERNO_MCU_ROOT)/local &&  git clone --local --no-hardlinks $(COMPONENTS_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
-	git -C $(TRONFERNO_MCU_ROOT)/local/components-mcu submodule update --init --recursive
+	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app_config/include/app_config/proj_app_cfg.h))
+	git -C $(TRONFERNO_MCU_ROOT) submodule init components-mcu
+	cd $(TRONFERNO_MCU_ROOT)/components-mcu &&  git -C .. submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(COMPONENTS_MCU_REPO) $(GIT_BRANCH) && \
+	git submodule init  &&  git -C .. submodule update --init --recursive
 
 pre_esp8266: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
