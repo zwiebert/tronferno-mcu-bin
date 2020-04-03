@@ -89,10 +89,6 @@ main_atmega328:
 post_atmega328: copy_avr_docs
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
-.PHONY: atmega328_doc
-atmega328_doc: co_master
-	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_DOC_CO) &&  git clean -fd
-
 all:  esp8266 test_host esp32 esp32lan atmega328
 
 
@@ -116,19 +112,16 @@ push :
 
 
 # copy user docs from source repository
-docs = $(shell cd  $(TRONFERNO_MCU_ROOT) && ls docs/*.md)
-imgs = $(shell cd  $(TRONFERNO_MCU_ROOT) && test -d docs/img && ls docs/img/*.png)
 .PHONY : copy_docs copy_avr_docs
-docs/%.md : $(TRONFERNO_MCU_ROOT)/docs/%.md
-	cp -p $< $@
-	git add $@
-docs/img/%.png : $(TRONFERNO_MCU_ROOT)/docs/img/%.png
-	cp -p $< $@
-copy_docs : $(docs) $(imgs)
+copy_docs:
 	cp -p $(TRONFERNO_MCU_ROOT)/README.md ./README_src.md
-copy_avr_docs : atmega328_doc docs/mcu_atmega328.md
-print_docs:
-	@echo $(docs) $(imgs)
+	mkdir -p docs/img
+	cp -p $(TRONFERNO_MCU_ROOT)/docs/*.md docs/ && git add docs/*.md
+	cp -p $(TRONFERNO_MCU_ROOT)/docs/img/*.png docs/img/ && git add docs/img/*.png
+copy_avr_docs:
+	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_DOC_CO) &&  git clean -fd
+	mkdir -p docs
+	cp -p $(TRONFERNO_MCU_ROOT)/docs/mcu_atmega328.md docs/ && git add docs/mcu_atmega328.md
 
 
 # the following targets needs to be made on Windows system (git-bash is fine)
