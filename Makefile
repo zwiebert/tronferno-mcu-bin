@@ -1,8 +1,8 @@
-
-THIS_ROOT = $(HOME)/proj/mcu/tronferno-mcu-bin
+THIS_ROOT := $(realpath .)
 TRONFERNO_MCU_ROOT = ./tronferno-mcu
 BUILD_BASE = tmp
-TRONFERNO_MCU_REPO = $(HOME)/proj/mcu/tronferno-mcu
+TRONFERNO_MCU_REPO := $(realpath ../tronferno-mcu)
+COMPONENTS_MCU_REPO := $(realpath ../components-mcu)
 
 ESP8266_MK_FLAGS = DISTRO=1 FW_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_firmware BUILD_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_build -C $(TRONFERNO_MCU_ROOT)
 
@@ -16,7 +16,7 @@ ESP32_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_build
 ESP32_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 ESP32_TEST_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_test_build
-ESP32_TEST_MK_FLAGS = BUILD_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
+ESP32_TEST_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
 FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
@@ -47,8 +47,10 @@ atmega328: pre_atmega328 main_atmega328 post_atmega328
 co_master:
 	-rm -rf $(THIS_ROOT)/$(TRONFERNO_MCU_ROOT)
 	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
-	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app/include/app/proj_app_cfg.h))
-
+	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app_config/include/app_config/proj_app_cfg.h))
+	git -C $(TRONFERNO_MCU_ROOT) submodule init components-mcu
+	cd $(TRONFERNO_MCU_ROOT)/components-mcu &&  git -C .. submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(COMPONENTS_MCU_REPO) $(GIT_BRANCH) && \
+	git submodule init  &&  git -C .. submodule update --init --recursive
 
 pre_esp8266: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
@@ -66,6 +68,8 @@ pre_esp32: co_master
 	make  $(ESP32_MK_FLAGS) esp32-clean
 test_esp32:
 	make $(ESP32_TEST_MK_FLAGS) esp32-test-clean esp32-test-build esp32-test-flash esp32-test-run
+test_host:
+	make $(ESP32_TEST_MK_FLAGS) host-test-all
 main_esp32:
 	make -j  $(ESP32_MK_FLAGS) esp32-all
 post_esp32: copy_docs
@@ -85,11 +89,7 @@ main_atmega328:
 post_atmega328: copy_avr_docs
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
-.PHONY: atmega328_doc
-atmega328_doc: co_master
-	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_DOC_CO) &&  git clean -fd
-
-all:  esp8266 esp32_test esp32 esp32lan atmega328
+all:  esp8266 test_host esp32 esp32lan atmega328
 
 
 clean:
@@ -112,19 +112,16 @@ push :
 
 
 # copy user docs from source repository
-docs = $(shell cd  $(TRONFERNO_MCU_ROOT) && ls docs/*.md)
-imgs = $(shell cd  $(TRONFERNO_MCU_ROOT) && test -d docs/img && ls docs/img/*.png)
 .PHONY : copy_docs copy_avr_docs
-docs/%.md : $(TRONFERNO_MCU_ROOT)/docs/%.md
-	cp -p $< $@
-	git add $@
-docs/img/%.png : $(TRONFERNO_MCU_ROOT)/docs/img/%.png
-	cp -p $< $@
-copy_docs : $(docs) $(imgs)
+copy_docs:
 	cp -p $(TRONFERNO_MCU_ROOT)/README.md ./README_src.md
-copy_avr_docs : atmega328_doc docs/mcu_atmega328.md
-print_docs:
-	@echo $(docs) $(imgs)
+	mkdir -p docs/img
+	cp -p $(TRONFERNO_MCU_ROOT)/docs/*.md docs/ && git add docs/*.md
+	cp -p $(TRONFERNO_MCU_ROOT)/docs/img/*.png docs/img/ && git add docs/img/*.png
+copy_avr_docs:
+	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_DOC_CO) &&  git clean -fd
+	mkdir -p docs
+	cp -p $(TRONFERNO_MCU_ROOT)/docs/mcu_atmega328.md docs/ && git add docs/mcu_atmega328.md
 
 
 # the following targets needs to be made on Windows system (git-bash is fine)
