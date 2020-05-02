@@ -55,7 +55,7 @@ def _find_getch():
 getch = _find_getch()
 
 cfg = configparser.ConfigParser()
-cmd_fmt = 'config %s=%s;\n'
+cmd_fmt = 'config %s="%s";\n'
 ser = 0
 CONFIG_FILE = "config.ini"
 ANY = 0
@@ -65,6 +65,7 @@ ser_list = sorted(ports.device for ports in list_ports.comports())
 ser_port = ser_list[0] if len(ser_list) else "com1" if is_windows else "/dev/ttyUSB0"
 
 c_mcu_a = [
+    ("network","wlan"),
     ("wlan-password",""),
     ("wlan-ssid",""),
     ("http-enable",""),
@@ -80,11 +81,14 @@ c_mcu = dict (c_mcu_a)
 
 
 opts_verify = {
+    "network": re.compile("^(none|ap|wlan|lan)$"),
     "mqtt-url": re.compile("^mqtt://"),
     "mqtt-enable": re.compile("^[01]$"),
     "http-enable": re.compile("^[01]$"),
 }
+
 opts_help = {
+    "network": "choose on of: none, ap, wlan, lan",
     "mqtt-url": "MQTT server/broker URL. example: mqtt-url = mqtt://192.168.1.42:7777",
     "mqtt-enable": "set it to 0 or 1 for disable or enable MQTT client",
     "http-enable": "set it to 0 or 1 for disable or enable HTTP server",
