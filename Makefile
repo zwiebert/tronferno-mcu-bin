@@ -89,7 +89,7 @@ main_atmega328:
 post_atmega328: copy_avr_docs
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
-all:  esp8266 test_host esp32 esp32lan atmega328
+all:  test_host esp32 esp32lan
 
 
 clean:
