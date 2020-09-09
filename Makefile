@@ -1,6 +1,6 @@
 THIS_ROOT := $(realpath .)
 TRONFERNO_MCU_ROOT = ./tronferno-mcu
-BUILD_BASE = tmp
+BUILD_BASE = $(THIS_ROOT)/tmp
 TRONFERNO_MCU_REPO := $(realpath ../tronferno-mcu)
 COMPONENTS_MCU_REPO := $(realpath ../components-mcu)
 
@@ -62,7 +62,7 @@ post_esp8266: copy_docs
 	cp -p $(BUILD_BASE)/esp8266_firmware/eagle.flash.bin $(BUILD_BASE)/esp8266_firmware/eagle.irom0text.bin ~/esp/ESP8266_NONOS_SDK/bin/esp_init_data_default_v08.bin ./firmware/esp8266/
 
 
-pre_esp32: co_master
+pre_esp32: co_master test_host
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp32
 	make  $(ESP32_MK_FLAGS) esp32-clean
@@ -89,7 +89,7 @@ main_atmega328:
 post_atmega328: copy_avr_docs
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
-all:  test_host esp32 esp32lan
+all:  esp32 esp32lan
 
 
 clean:
