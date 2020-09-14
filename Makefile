@@ -1,21 +1,21 @@
 THIS_ROOT := $(realpath .)
-TRONFERNO_MCU_ROOT = ./tronferno-mcu
+TRONFERNO_MCU_ROOT = $(THIS_ROOT)/tronferno-mcu
 BUILD_BASE = $(THIS_ROOT)/tmp
 TRONFERNO_MCU_REPO := $(realpath ../tronferno-mcu)
 COMPONENTS_MCU_REPO := $(realpath ../components-mcu)
 
-ESP8266_MK_FLAGS = DISTRO=1 FW_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_firmware BUILD_BASE=$(THIS_ROOT)/$(BUILD_BASE)/esp8266_build -C $(TRONFERNO_MCU_ROOT)
+ESP8266_MK_FLAGS = DISTRO=1 FW_BASE=$(BUILD_BASE)/esp8266_firmware BUILD_BASE=$(BUILD_BASE)/esp8266_build -C $(TRONFERNO_MCU_ROOT)
 
 
-AVR_FW_DIR = ../../../$(BUILD_BASE)/atmega328_firmware
-AVR_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/atmega328_build
+AVR_FW_DIR = $(BUILD_BASE)/atmega328_firmware
+AVR_BUILD_DIR = $(BUILD_BASE)/atmega328_build
 AVR_MK_FLAGS = DISTRO=1 FW_BASE=$(AVR_FW_DIR) BUILD_BASE=$(AVR_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 
-ESP32_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_build
+ESP32_BUILD_DIR = $(BUILD_BASE)/esp32_build
 ESP32_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
-ESP32_TEST_BUILD_DIR = $(THIS_ROOT)/$(BUILD_BASE)/esp32_test_build
+ESP32_TEST_BUILD_DIR = $(BUILD_BASE)/esp32_test_build
 ESP32_TEST_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
@@ -45,12 +45,12 @@ esp32lan: pre_esp32 main_esp32lan post_esp32lan
 atmega328: pre_atmega328 main_atmega328 post_atmega328
 
 co_master:
-	-rm -rf $(THIS_ROOT)/$(TRONFERNO_MCU_ROOT)
+	-rm -rf $(TRONFERNO_MCU_ROOT)
 	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
 	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app_config/include/app_config/proj_app_cfg.h))
-	git -C $(TRONFERNO_MCU_ROOT) submodule init components-mcu
-	cd $(TRONFERNO_MCU_ROOT)/components-mcu &&  git -C .. submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(COMPONENTS_MCU_REPO) $(GIT_BRANCH) && \
-	git submodule init  &&  git -C .. submodule update --init --recursive
+	git -C $(TRONFERNO_MCU_ROOT) submodule init comp/external/components-mcu
+	cd $(TRONFERNO_MCU_ROOT)/comp/external/components-mcu &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(COMPONENTS_MCU_REPO) $(GIT_BRANCH) && \
+	git submodule init  &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --init --recursive
 
 pre_esp8266: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
