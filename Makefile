@@ -32,7 +32,9 @@ ATMEGA328_DOC_CO = 7904350e42f668603a721bc844ca3f4614186431
 GIT_BRANCH ?= $(shell git branch | grep \* | cut -d ' ' -f2)
 
 
-distribute : clean all commit push
+distribute : clean all commit push tag
+build : clean all 
+deploy: commit push tag
 
 .PHONY : print_branch
 print_branch:
@@ -110,6 +112,9 @@ pull :
 push :
 	git push
 
+tag:
+	git -C $(TRONFERNO_MCU_ROOT) describe --tags | xargs git tag
+	git push --tags
 
 # copy user docs from source repository
 .PHONY : copy_docs copy_avr_docs
