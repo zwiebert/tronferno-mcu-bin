@@ -43,7 +43,6 @@ print_branch:
 esp8266: pre_esp8266 main_esp8266 post_esp8266
 esp32: pre_esp32 main_esp32 post_esp32
 esp32_test: pre_esp32 test_esp32
-esp32lan: pre_esp32 main_esp32lan post_esp32lan
 atmega328: pre_atmega328 main_atmega328 post_atmega328
 
 co_master:
@@ -77,10 +76,6 @@ main_esp32:
 post_esp32: copy_docs
 	cp -p $(ESP32_BUILD_DIR)/bootloader/bootloader.bin  $(ESP32_BUILD_DIR)/tronferno-mcu.bin $(ESP32_BUILD_DIR)/ota_data_initial.bin ./firmware/esp32/
 	cp -p $(ESP32_BUILD_DIR)/partition_table/partition-table.bin ./firmware/esp32/partitions.bin
-main_esp32lan:
-	make -j  $(ESP32_MK_FLAGS) FLAVOR_LAN=1 esp32-all
-post_esp32lan:
-	cp -p  $(ESP32_BUILD_DIR)/tronferno-mcu.bin  ./firmware/esp32/tronferno-mcu-lan.bin
 
 pre_atmega328: co_master
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_CO) &&  git clean -fd
@@ -91,7 +86,7 @@ main_atmega328:
 post_atmega328: copy_avr_docs
 	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
-all:  esp32 esp32lan 
+all:  esp32
 
 
 clean:
