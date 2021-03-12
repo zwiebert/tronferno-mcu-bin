@@ -115,10 +115,11 @@ tag:
 .PHONY : copy_docs copy_avr_docs
 copy_docs:
 	cp -p $(TRONFERNO_MCU_ROOT)/README.md ./README_src.md
-	mkdir -p docs/img
+	mkdir -p docs/img docs/img/gwcc
 	cp -p $(TRONFERNO_MCU_ROOT)/docs/*.md docs/ && git add docs/*.md
 	cp -p $(TRONFERNO_MCU_ROOT)/docs/*.pdf docs/ && git add docs/*.pdf
 	cp -p $(TRONFERNO_MCU_ROOT)/docs/img/*.png docs/img/ && git add docs/img/*.png
+	cp -p $(TRONFERNO_MCU_ROOT)/docs/img/gwcc/*.jpg docs/img/gwcc && git add docs/img/gwcc/*.jpg
 copy_avr_docs:
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_DOC_CO) &&  git clean -fd
 	mkdir -p docs
