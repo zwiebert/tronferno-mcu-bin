@@ -1,4 +1,4 @@
-# Tronferno / tronferno-mcu-bin
+# tronferno-mcu-bin
 
 [----> Lese in Deutsch](README-de.md)
 

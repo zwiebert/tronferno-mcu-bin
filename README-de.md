@@ -19,4 +19,4 @@
   
 ## Inkompatible Änderungen
 
-   * 2021-03 - OTA-Firmware-Update (über Web-Browser): Mit der neuesten Entwicklungsumgebung stieg die Größe der Firmware-Datei über 1MB. Dadurch lassen sich ESP32 module die vor April 2020 das letzte mal über USB geflasht wurden nicht mehr per OTA/Webbrowser) updaten.  Ein einmaliges Firmware-Update über USB (z.B. menutool oder FHEM Modul TronfernoMCU) behebt das Problem.
+   * 2021-03 - OTA-Firmware-Update (über Web-Browser): Mit der neuesten Entwicklungsumgebung stieg die Größe der Firmware-Datei über 1MB. Dadurch lassen sich ESP32 module die vor April 2020 das letzte mal über USB geflasht wurden nicht mehr per OTA/Webbrowser updaten.  Ein einmaliges Firmware-Update über USB (z.B. menutool oder FHEM Modul TronfernoMCU) behebt das Problem.
