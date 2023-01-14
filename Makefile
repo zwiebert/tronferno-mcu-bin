@@ -49,8 +49,8 @@ co_master:
 	-rm -rf $(TRONFERNO_MCU_ROOT)
 	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
 	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app_config/include/app_config/proj_app_cfg.h))
-	git -C $(TRONFERNO_MCU_ROOT) submodule init comp/external/components-mcu
-	cd $(TRONFERNO_MCU_ROOT)/comp/external/components-mcu &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(COMPONENTS_MCU_REPO) $(GIT_BRANCH) && \
+	git -C $(TRONFERNO_MCU_ROOT) submodule init comp/components-mcu
+	cd $(TRONFERNO_MCU_ROOT)/comp/components-mcu &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(COMPONENTS_MCU_REPO) $(GIT_BRANCH) && \
 	git submodule init  &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --init --recursive
 
 pre_esp8266: co_master
