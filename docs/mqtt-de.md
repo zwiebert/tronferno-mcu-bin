@@ -1,52 +1,52 @@
-#### MQTT Topics you can send to:
+### MQTT Topics an die du senden kannst:
 
-* tfmcu/+/cmd - Commands like up, down, stop
-     * The plus sign represents the ID of the shutter:
+* tfmcu/+/cmd - Kommandos wie: up, down, stop, ...
+     * Das Plus-Zeichen steht für Gruppe und Nummer des Empfängers (bei Bedarf auch ID):
 
 ```
-       tfmcu/23/cmd       # member 3 of group 2
-       tfmcu/102030/cmd   # 6 digit hex-ID
-       tfmcu/8090a023/cmd # 6 digit hex-ID + group + member
+       tfmcu/23/cmd       # Empfänger 3 aus Gruppe 2
+       tfmcu/102030/cmd   # 6 stellige Hexadezimale-ID
+       tfmcu/8090a023/cmd # 6 stellige Hexadezimale-ID + Gruppe + Empfänger
 
 
-     Examples:
+     Beispiele:
 
-     FHEM Set-List Entries:
-        stop tfmcu/25/cmd $EVENT      # topic: 'tfmcu/25/cmd' data: 'stop'. Stops shutter 5 of group 2.
-        down tfmcu/101234/cmd $EVENT  # topic: 'tfmcu/101234/cmd' data: 'down'. Move down shutters paired with controller 101234.
-        up tfmcu/25/cmd $EVENT        # topic: 'tfmcu/10/cmd' data: 'up'.  Move up all shutters of group 1.
-        up tfmcu/25/cmd $EVENT        # topic: 'tfmcu/00/cmd' data: 'up'.  Move up all shutters of all groups.
+     FHEM Set-List Einträge:
+        stop tfmcu/25/cmd $EVENT      # topic: 'tfmcu/25/cmd' data: 'stop'. Stoppt Empfänger 5 aus Gruppe 2.
+        down tfmcu/101234/cmd $EVENT  # topic: 'tfmcu/101234/cmd' data: 'down'. Bewegt alle Empfänger an denen der Sender 101234 angemeldet ist.
+        up tfmcu/25/cmd $EVENT        # topic: 'tfmcu/10/cmd' data: 'up'.  Bewegt alle Empfänger aus Gruppe 1.
+        up tfmcu/25/cmd $EVENT        # topic: 'tfmcu/00/cmd' data: 'up'.  Bewegt die Empfänger aller Gruppen.
 ```
 
 
-* tfmcu/+/pct - percentages 100 for open, 0 for close,  ? for query
+* tfmcu/+/pct - Positionen/Prozente 100 für offen, 0 für geschlossen,  ? zum abfragen der aktuellen Position
 
-     * the plus sign means the same as in tfmcu/+/cmd above
+     * Das Plus-Zeichen hat die gleiche Bedeutung wie bei "tfmcu/+/cmd" oben beschrieben
 
-     * percentages other than 100 and 0 only work for group/members of the configured central unit.
+     * Prozente zwischen 100 und 0 (wie 50%) funktionieren nur mit Empfängernummer aus einer Gruppe, nicht mit IDs.
      
 
 
 ```
-    Example:
-      topic: tfmcu/15/pct data: 33   # set member 5 of group 1 to 33%
-      topic: tfmcu/15/pct data: ?    # Current percentage will be published at topic tfmcu/15/pct_out
+    Beispiel:
+      topic: tfmcu/15/pct data: 33   # Bewege Empfänger 5 aus Gruppe 1 zur Position 33%
+      topic: tfmcu/15/pct data: ?    # Frage aktuelle Position ab. Das Ergebnis wird im tfmcu/15/pct_out veröffentlich.
 ```
 
 
-* tfmcu/cli  - Any [CLI](CLI.md) command can be send here
+* tfmcu/cli  - Jedes [CLI](CLI.md) Kommmando kann an dieses Topic gesenet werden
 
-     * commands can be sent in CLI syntax or in JSON format
+     * Kommando könne in CLI text oder JSON format gesendet werden
 
-     * reply will be sent to tfmcu/cli_out in JSON format
+     * Das Ergebnis des Kommandos wird im Topic "tfmcu/cli_out" im JSON format veröffentlicht
 
-     * if using CLI syntax, don't terminate commands with semicolon or try to send mutiple commands separated by semicolon
-
-     * For better use from FHEM Setlist: you may prepend commands with the word 'cli'. It will be ignored.
+     * Wenn CLI text Format benutzt wird, dann jeweils nur ein Kommando und ohne Semikolon als Abschluss
+     
+     * Zur Vereinfachung mit FHEM Set-Liste: Du kannst Kommandos mit dem Wort 'cli' beginnen. Dieses wird ignoriert.
 
 
 ```
-    Example:
+    Beispiel:
       topic: tfmcu/cli
          data: config all=?
          data: {"config":{"all":"?"}}
@@ -71,18 +71,20 @@
 ```
 
 
-#### MQTT Topics you can subscribe to:
+#### MQTT Topics von denen du Daten/Ergebnisse erhalten kannst (Du kannst diese abonnieren/subscriben):
 
-* tfmcu/cli_out - Response (in JSON) of any CLI command sent to tfmcu/cli.
+* tfmcu/cli_out - Ergebnis (in JSON Format) eines CLI Kommandos das an tfmcu/cli gesendet wurde.
 
-* tfmcu/+/pct_out - current shutter position in percent (+ stands for shutter ID)
+* tfmcu/+/pct_out - Aktuelle Position eines Empfängers in Prozent (Plus Zeichen wie oben beschrieben)
 
-* tfmc/gpi/+/level - change of level (0,1) on input pin (must have been set as input pin in config)
+* tfmc/gpi/+/level - Änderungen des Pegels (0,1) eines Eingangs-Pins (GPI) wenn dieser in der Konfiguration definiert wurde.
 
 
-#### Examples
+#### Beispiele
 
-##### Defining a shutter device with FHEM MQTT2_Device
+In der Weboberfläche (unter Fragezeichen->HSC) sind MQTT-Definitionen für HomeServer zu finde.
+
+##### Beispiel: Definiere einen Empfänger mit FHEMs MQTT2_Device
 
 
 ~~~
