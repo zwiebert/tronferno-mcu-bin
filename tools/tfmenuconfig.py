@@ -293,7 +293,7 @@ def do_app_config_read(path):
     """
     try:
         cf = open(path, "r")
-        cfg.readfp(cf)
+        cfg.read_file(cf)
         for key in cfg.options('MCU'):
             value = cfg.get('MCU', key)
             c_mcu[key] = value
@@ -441,6 +441,7 @@ def ui_menu_root():
           "   URLs: http://%s -or- http://tronferno.fritz.box\n" % (ip_address)+
           "\n")
     c = getch()
+
     if   c == "p":
         port = ui_menu_serial()
         if port: c_flash["serial-port"] = port
