@@ -7,7 +7,7 @@
 ## Author: Bert Winkelmann <tf.zwiebert@online.de> (2019)
 ## License: GNU General Public License Version 3 (GNU GPL v3)
 ################################################################################
-import sys, os, serial, sys, re
+import sys, os, serial, sys, re, json
 PYTHON2 = (sys.version_info < (3, 0))
 
 if PYTHON2:
@@ -52,11 +52,21 @@ def _find_getch():
         return ch
 
     return _getch
-getch = _find_getch()
+
+our_getch = _find_getch()
+
+def getch():
+    """return one char string"""
+    c = our_getch()
+    try:
+        return c.decode()
+    except Exception:
+        return c
 
 cfg = configparser.ConfigParser()
 cmd_fmt = 'config %s="%s";\n'
 ser = 0
+ip_address = "0.0.0.0"
 CONFIG_FILE = "config.ini"
 ANY = 0
 MCU_CFG_RETRY_N = 6
@@ -168,7 +178,24 @@ def do_esptool_chip_id(port=""):
         press_enter()
 
 
-
+def do_tfmcu_read_ip_address():
+    """
+    writes a tfmcu config key/value pair.
+    """
+    cmd = json.dumps({"mcu":{"ip-address":"?"}})+";"
+    ser.write(cmd.encode('utf-8'))
+    lines = ser.readlines()
+    for line in lines:
+        line = line.decode('utf-8')
+        if line.startswith("{"):
+            print(line)
+            try:
+                result = json.loads(line);
+                return result["mcu"]["ip-address"];
+            except Exception as e:
+                print("unsuccessful: %s" % e)
+                press_enter()
+    return None
 
 def do_tfmcu_write_config_2(key, value):
     """
@@ -194,12 +221,13 @@ def do_tfmcu_write_config(key, value):
     """
     writes a tfmcu config key/value pair and reports success or failure
     """
+    sys.stdout.write("Try to set option \""+key+"\" ");
     for i in range(MCU_CFG_RETRY_N):
         write_point()
         if do_tfmcu_write_config_2(key, value):
-            print("setting option "+key+" succeeded")
+            print(" succeeded")
             return True
-    print("ERROR: setting option "+key+" failed")
+    print(" FAILED")
     return False
 
 def do_tfmcu_write_config_all():
@@ -220,6 +248,27 @@ def do_tfmcu_write_config_all():
             do_tfmcu_write_config_2(key, value)
         else:
             do_tfmcu_write_config(key, value)
+    do_tfmcu_write_config("restart", "1")
+    ser.close()
+
+def do_tfmcu_get_ip_address():
+    """
+    request the ip-address from tfmcu
+    """
+    global ser, ip_address
+    try:
+        ser = serial.Serial(c_flash["serial-port"], int(c_flash["serial-baud"]), timeout=1)
+    except:
+        print("cannot open serial port " + ser_port)
+        ser_list = sorted(ports.device for ports in list_ports.comports())
+        print(ser_list)
+        return
+
+    ipaddr = do_tfmcu_read_ip_address()
+    if (ipaddr):
+        print("success");
+        ip_address = ipaddr;
+
     ser.close()
 
 def do_app_config_save(path):
@@ -244,7 +293,7 @@ def do_app_config_read(path):
     """
     try:
         cf = open(path, "r")
-        cfg.readfp(cf)
+        cfg.read_file(cf)
         for key in cfg.options('MCU'):
             value = cfg.get('MCU', key)
             c_mcu[key] = value
@@ -361,7 +410,7 @@ def ui_menu_opts(text, c_arr, c_hash, proc_opts=0, ver_opts=0):
                 print("ex: %s" % e)
                 return
 
-ui_menu_txt = "\n\n\n\nPress key to choose menu item:\n"
+ui_menu_txt = "\n\n\n\nPress [key] to choose menu item:\n"
 
 
 def ui_menu_root():
@@ -369,34 +418,42 @@ def ui_menu_root():
     user main menu. should be called from an endless loop as long it returns True
     """
     print(ui_menu_txt+"\n"
-          " [q] save config data to file and quit\n"
-          " [X] discard config data and quit\n"
-          " [s] save configuration data but don't quit\n"
+          "\n   Save Progress / Quitting:\n"
+          "    [s] Save your changes (e.g. serial port, MCU pre-configuration)\n"
+          "    [X] Exit this program  (unsaved data will be lost)\n"
           "\n"
-          " [i] find connected chips and print info\n"
-          " [I] print info on chip at %s\n" % (c_flash["serial-port"])+
-          " [f] configure flash options like serial-port, chip-type, etc\n"
-          " [w] write flash (%s@%s). Writes the firmware\n" % (c_flash["chip"], c_flash["serial-port"])+
-          " [e] erase flash (%s@%s). Usually not needed. Clears any data and firmware.\n" % (c_flash["chip"], c_flash["serial-port"])+
+          "1) Connect to the Microcontroller:\n"
+          "    [i] Find connected chips and print info\n"
+          "    [p] Choose the connected USB/COM port\n"
+          "    [I] Print info about chip %s@%s\n" % (c_flash["chip"], c_flash["serial-port"])+
+          "    [f] If needed: configure some more flash options\n"
           "\n"
-          " [c] configure tronferno-mcu options like WLAN and MQTT login data\n"
-          " [o] write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)\n"
-          "\nShortcuts:\n"
-          " [p] change serial port (%s)\n" % (c_flash["serial-port"])+
+          "2) Flash the Microcontroller:\n"
+          "    [e] Erase flash (%s@%s). Usually not needed. Clears any data and firmware.\n" % (c_flash["chip"], c_flash["serial-port"])+
+          "    [w] Write firmware to flash (%s@%s).\n" % (c_flash["chip"], c_flash["serial-port"])+
+          "\n"
+          "3) Connect the Microncontroller to WIFI\n"
+          "    [c] Configure tronferno-mcu options like WLAN and MQTT login data\n"
+          "    [o] Write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)\n"
+          "\n"
+          "4) Access the builtin webserver: IP-Address: %s, Hostname: tronferno\n" % (ip_address)+
+          "    [a] Get IP address from chip\n"
+          "   URLs: http://%s -or- http://tronferno.fritz.box\n" % (ip_address)+
           "\n")
     c = getch()
+
     if   c == "p":
         port = ui_menu_serial()
         if port: c_flash["serial-port"] = port
     elif c == "c": ui_menu_opts(ui_menu_txt, c_mcu_a, c_mcu, ver_opts=ui_verify_mcu_opts)
-    elif c == "o": do_tfmcu_write_config_all()
+    elif c == "o": do_tfmcu_write_config_all(); press_enter()
+    elif c == "a": do_tfmcu_get_ip_address();  press_enter()
     elif c == "X": return False
     elif c == "e": do_esptool_erase_flash();   press_enter()
     elif c == "w": do_esptool_write_flash();   press_enter()
     elif c == "i": do_esptool_chip_id()
     elif c == "I": do_esptool_chip_id(c_flash["serial-port"])
     elif c == "s": do_app_config_save(CONFIG_FILE)
-    elif c == "q": do_app_config_save(CONFIG_FILE); return
     elif c == "f": ui_menu_opts(ui_menu_txt, c_flash_a, c_flash, proc_opts=ui_process_flash_opts)
     return True
 
