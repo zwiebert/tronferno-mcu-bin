@@ -52,7 +52,16 @@ def _find_getch():
         return ch
 
     return _getch
-getch = _find_getch()
+
+our_getch = _find_getch()
+
+def getch():
+    """return one char string"""
+    c = our_getch()
+    try:
+        return c.decode()
+    except Exception:
+        return c
 
 cfg = configparser.ConfigParser()
 cmd_fmt = 'config %s="%s";\n'
@@ -284,7 +293,7 @@ def do_app_config_read(path):
     """
     try:
         cf = open(path, "r")
-        cfg.readfp(cf)
+        cfg.read_file(cf)
         for key in cfg.options('MCU'):
             value = cfg.get('MCU', key)
             c_mcu[key] = value
@@ -432,6 +441,7 @@ def ui_menu_root():
           "   URLs: http://%s -or- http://tronferno.fritz.box\n" % (ip_address)+
           "\n")
     c = getch()
+
     if   c == "p":
         port = ui_menu_serial()
         if port: c_flash["serial-port"] = port
