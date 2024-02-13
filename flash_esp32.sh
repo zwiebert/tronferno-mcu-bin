@@ -12,7 +12,7 @@ then
     echo "usage: . flash_esp32.sh /dev/ttyUSBx"
 else
 
-
+    python -m pip install -q pyserial && \
     python tools/esptool.py --chip esp32 --port $comport  --baud 230400 \
 	   --before default_reset --after hard_reset \
 	   write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect \
