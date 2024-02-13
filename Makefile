@@ -128,10 +128,17 @@ copy_avr_docs:
 
 # the following targets needs to be made on Windows system (git-bash is fine)
 .PHONY : windows
-windows: tools/esptool.exe  tools/dist/tfmenuconfig/tfmenuconfig.exe
+windows: tools/dist/esptool/esptool.exe  tools/dist/tfmenuconfig/tfmenuconfig.exe
+windows_clean:
+	rm -rf tools/dist tools/build
 
-tools/esptool.exe: tools/esptool.py
-	cd tools && cmd '/C py2exe_esptool.cmd'
+tools/dist/esptool/esptool.exe: tools/esptool.py
+	cd tools && pyinstaller -y esptool.py
+	cd tools && mkdir -p dist/esptool/_internal/esptool/targets &&\
+		cp -r esptool/targets/stub_flasher dist/esptool/_internal/esptool/targets
 
 tools/dist/tfmenuconfig/tfmenuconfig.exe: tools/tfmenuconfig.py
-	cd tools && winpty /c/Python27/Scripts/pyinstaller.exe -y tfmenuconfig.py
+	cd tools && pyinstaller -y tfmenuconfig.py
+	cd tools && mkdir -p dist/tfmenuconfig/_internal/esptool/targets &&\
+		cp -r esptool/targets/stub_flasher dist/tfmenuconfig/_internal/esptool/targets
+

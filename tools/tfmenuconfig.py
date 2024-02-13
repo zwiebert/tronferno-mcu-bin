@@ -52,7 +52,16 @@ def _find_getch():
         return ch
 
     return _getch
-getch = _find_getch()
+
+our_getch = _find_getch()
+
+def getch():
+    """return one char string"""
+    c = our_getch()
+    try:
+        return c.decode()
+    except Exception:
+        return c
 
 cfg = configparser.ConfigParser()
 cmd_fmt = 'config %s="%s";\n'
