@@ -4,16 +4,22 @@
 
 ## Overview
 
-  Tronferno ist eine Mikrocontroller-Firmware zum Steuern von Fernotron Geräten (idR Rollläden).
-  Das Ziel ist die komplette Funktionalität der originalen Programmierzentrale, und mehr, zu implementieren.  Aber auch einfach das komforatable Steuern der Grundfunktionen wie Auf und Zu.
+  Tronferno ist eine Mikrocontroller-Firmware zum Steuern und Konfigurieren von Fernotron Geräten (Rollläden).
   
-  Dieses Repository enhält die Firmware-Binaries und die zum Flashen notwendigen Programme und Information. 
+  Die Web-Oberfläche ersetzt dabei auch die Funktionen der originalen Programmierzentrale.
+  
+  Konfigurationen für einige HomeServer werden automatisch erstellt.
+  
+  
+  Dieses Repository enhält die Firmware-Binaries und die zum Flashen notwendigen Werkzeuge und Anleitungen. 
   
   
 ## Weitere Information
   
    * Lies die [Schnellstart-Anleitung](docs/starter-de.md)
-   
+
+   * Lies die [Anleitung zum Flashen mit menutool](docs/menutool-de.md)
+      
    * Finde den Quell-Code im Repository [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu)
    
   
