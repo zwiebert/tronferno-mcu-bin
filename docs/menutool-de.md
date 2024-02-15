@@ -1,9 +1,9 @@
 ### tronferno-menutool
 
-  * The tool lets you flash the firmware and aids in configuring the WIFI connection.
+  * Das Tool dient zum interaktiven Flashen der Firmware und zum Konfigurieren der WLAN Verbindung
   
-  1. Start menutool (./menutool.sh on Linux, .\menutool.cmd on Windows) from main directory.
-  It will show you a text based menu.
+  1. Starte menutool (./menutool.sh auf Linux, .\menutool.cmd auf Windows) vom aupt-Verzeichnis.
+     Es öffnet sich ein Menü das über Buchstaben-Tasten gesteuert wird.
 
 ```
 
@@ -23,7 +23,6 @@ Press [key] to choose menu item:
 2) Flash the Microcontroller:
     [e] Erase flash (esp32@/dev/ttyUSB1). Usually not needed. Clears any data and firmware.
     [w] Write firmware to flash (esp32@/dev/ttyUSB1).
-
 3) Connect the Microncontroller to WIFI
     [c] Configure tronferno-mcu options like WLAN and MQTT login data
     [o] Write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)
@@ -34,15 +33,14 @@ Press [key] to choose menu item:
 
 ```
   1)
-     * Connect the microcontroller via USB
-     * Press 'i' to find the correct port
-     * Press 'f' to configure the serial port
+     * Schließe Mikrocontroller über USB an
+     * Drücke 'i' zum Ausprobieren welcher COM/USB-Port der richtige ist
+     * Drücke 'f' zur Konfiguration
   
- Hint: On Windows, you may need to install the virtual com-port-driver for the specific USB chip used on the microcontroller board.
-       Use Windows-DeviceManager to find out which driver you need.
+ Hinweis: Unter Windows kann es nötig sein den virtual-com-port Treiber für den auf dem Board verbauten
+          USB-Chip downzuloaden. Öffne Windows-DeviceManager um den Chip zu identifizieren. 
 ```
 Press key to choose menu item:
-
  [y] apply changes and leave menu
  [X] discard changes and leave menu
 
@@ -55,9 +53,9 @@ Enter value for chip (esp8266): ...esp32
 
 ```
   2)
-    * If you want to erase the chip, press 'e'
-    * Press 'w' to write the firmware to chip
-    * Press 'c' to configure WLAN, HTTP and MQTT login data. (Note: MQTT can also be configured later from Web-Interface, once WLAN is configured and HTTP enabled)
+    * Wenn du den Flash Speicher total löschen möchtest, dann 'e' drücken.
+    * Zum flashen der Firmware, 'w' drücken.
+    * Drücke 'c' zur Konfiguration von WLAN und HTTP
 ```
 Press key to choose menu item:
 
@@ -71,13 +69,13 @@ Press key to choose menu item:
  [e] http-password ()
  [f] mqtt-enable (1)
  [g] mqtt-url (mqtt://192.168.1.42:7777)
- [h] mqtt-user (xxx)
- [i] mqtt-password (xxx)
+ [h] mqtt-user ()
+ [i] mqtt-password ()
 
 ```
   3)
-   Press 'o' to write WLAN and MQTT login data to the chip. 
+   Drücke 'o' to write WLAN and MQTT login data to the chip. 
   
   4)
-   Press 'a' to read the IP address from the microcontroller and use a webrowser to connect to it.
+   Drücke 'a' zu auslesen der IP adresse from the microcontroller and use a webrowser to connect to it.
    

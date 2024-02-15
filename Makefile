@@ -137,7 +137,7 @@ tools/dist/esptool/esptool.exe: tools/esptool.py
 	cd tools && mkdir -p dist/esptool/_internal/esptool/targets &&\
 		cp -r esptool/targets/stub_flasher dist/esptool/_internal/esptool/targets
 
-tools/dist/tfmenuconfig/tfmenuconfig.exe: tools/tfmenuconfig.py
+tools/dist/tfmenuconfig/tfmenuconfig.exe: tools/tfmenuconfig.py tools/tfmenuconfig/appcfg.py tools/tfmenuconfig/espt.py tools/tfmenuconfig/getch.py tools/tfmenuconfig/globvar.py tools/tfmenuconfig/__init__.py tools/tfmenuconfig/mcucom.py tools/tfmenuconfig/menu.py tools/tfmenuconfig/ui.py tools/tfmenuconfig/loc.py
 	cd tools && pyinstaller -y tfmenuconfig.py
 	cd tools && mkdir -p dist/tfmenuconfig/_internal/esptool/targets &&\
 		cp -r esptool/targets/stub_flasher dist/tfmenuconfig/_internal/esptool/targets
