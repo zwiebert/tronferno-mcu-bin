@@ -2,27 +2,27 @@
 
 [---> Read in English](README.md)
 
-## Overview
+## Übersicht
 
-  Tronferno ist eine Mikrocontroller-Firmware zum Steuern und Konfigurieren von Fernotron Geräten (Rollläden).
-  
-  Die Web-Oberfläche ersetzt dabei auch die Funktionen der originalen Programmierzentrale.
-  
-  Konfigurationen für einige HomeServer werden automatisch erstellt.
-  
-  
-  Dieses Repository enhält die Firmware-Binaries und die zum Flashen notwendigen Werkzeuge und Anleitungen. 
-  
-  
+  Dieses Repository enhält die Firmware-Binaries von tronfenro-mcu und Programme zum Flashen unter Linux und Windows
+
+  Tronferno ist eine Mikrocontroller-Firmware zum Steuern und Konfigurieren von Fernotron Geräten (Rollläden). Die Web-Oberfläche ersetzt dabei auch die Funktionen der originalen Programmierzentrale. Homeserver werden per MQTT angebunden. Konfigurationen für einige HomeServer werden automatisch erstellt.
+
+## Flashen und Netzwerkverbindung
+
+  Ein selbsterklärendes interaktives Programm für Kommandozeile (Windows: menutool.cmd, Linux menutool.sh) übernimmt das Flashen, das Einrichten des WLAN und die Anzeige der URL zum öffnen der Weboberfläche.
+
+## Erste Schritte
+
+  Entweder du baust die Hardwware so weit zusammen, dass Funksignale gesendet werden können. Oder du startest mit einem nackten ESP32 Board und bringst Weboberfläche und Homeserveranbindung zum Laufen, auch wenn sich dann bis zum Hinzufügen des Funksende-Moduls nur Slider im Browser bewegen, statt der Rollläden.
+
+
 ## Weitere Information
   
    * Lies die [Schnellstart-Anleitung](docs/starter-de.md)
 
-   * Lies die [Anleitung zum Flashen mit menutool](docs/menutool-de.md)
+   * Wenn Probleme mit menutool auftreten, lies die [Menutool Anleitung](docs/menutool-de.md)
       
    * Finde den Quell-Code im Repository [tronferno-mcu](https://github.com/zwiebert/tronferno-mcu)
    
   
-## Inkompatible Änderungen
-
-   * 2021-03 - OTA-Firmware-Update (über Web-Browser): Mit der neuesten Entwicklungsumgebung stieg die Größe der Firmware-Datei über 1MB. Dadurch lassen sich ESP32 module die vor April 2020 das letzte mal über USB geflasht wurden nicht mehr per OTA/Webbrowser updaten.  Ein einmaliges Firmware-Update über USB (z.B. menutool oder FHEM Modul TronfernoMCU) behebt das Problem.
