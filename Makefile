@@ -108,7 +108,7 @@ push :
 	git push
 
 tag:
-	git -C $(TRONFERNO_MCU_ROOT) describe --tags | xargs git tag
+	git -C $(TRONFERNO_MCU_ROOT) describe --tags | xargs git -f tag
 	git push --tags
 
 # copy user docs from source repository
