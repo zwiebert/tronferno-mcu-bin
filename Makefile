@@ -74,7 +74,7 @@ test_host:
 main_esp32:
 	make -j  $(ESP32_MK_FLAGS) esp32-all
 post_esp32: copy_docs
-	cp -p $(ESP32_BUILD_DIR)/bootloader/bootloader.bin  $(ESP32_BUILD_DIR)/tronferno-mcu.bin $(ESP32_BUILD_DIR)/ota_data_initial.bin ./firmware/esp32/
+	cp -p $(ESP32_BUILD_DIR)/bootloader/bootloader.bin $(ESP32_BUILD_DIR)/tronferno-mcu.elf $ $(ESP32_BUILD_DIR)/tronferno-mcu.bin $(ESP32_BUILD_DIR)/ota_data_initial.bin ./firmware/esp32/
 	cp -p $(ESP32_BUILD_DIR)/partition_table/partition-table.bin ./firmware/esp32/partitions.bin
 
 pre_atmega328: co_master
@@ -108,7 +108,7 @@ push :
 	git push
 
 tag:
-	git -C $(TRONFERNO_MCU_ROOT) describe --tags | xargs git tag
+	git -C $(TRONFERNO_MCU_ROOT) describe --tags | xargs git tag --force
 	git push --tags
 
 # copy user docs from source repository
