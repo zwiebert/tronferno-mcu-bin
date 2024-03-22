@@ -109,7 +109,8 @@ push :
 
 tag:
 	git -C $(TRONFERNO_MCU_ROOT) describe --tags | xargs git tag --force
-	git push --tags
+	git describe --tags | xargs git push origin
+	git describe --tags | xargs git push hs
 
 # copy user docs from source repository
 .PHONY : copy_docs copy_avr_docs
