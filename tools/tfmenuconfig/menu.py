@@ -145,14 +145,14 @@ def ui_menu_root():
           "    [I] {txt} ({chip}@{port}):\n".format(txt=loc["rm_I"], chip=c_flash["chip"], port=c_flash["serial-port"]) +
           "    [f] {txt}\n".format(txt=loc["rm_f"]) +
           "    [t] {txt}\n".format(txt=loc["rm_t"]) +
-          "\n2) {txt} ({chip}@{port}):\n".format(txt=loc["rm_w"], chip=c_flash["chip"], port=c_flash["serial-port"]) +
+          "\n2) {txt} ({chip}@{port}):\n".format(txt=loc["rm_p2"], chip=c_flash["chip"], port=c_flash["serial-port"]) +
           "    [E] {txt}\n".format(txt=loc["rm_E"]) +
 
           "    [w] {txt}\n".format(txt=loc["rm_w"]) +
           "\n3) {txt}\n".format(txt=loc["rm_p3"]) +
           "    [c] {txt}\n".format(txt=loc["rm_c"]) +
           "    [o] {txt}\n".format(txt=loc["rm_o"]) +
-          "\n4) {txt}: IP-Address: {ipa}, Hostname: tronferno\n".format(txt=loc["rm_w"], ipa=misc_data["ipaddr"]) +
+          "\n4) {txt}: IP-Address: {ipa}, Hostname: tronferno\n".format(txt=loc["rm_p4"], ipa=misc_data["ipaddr"]) +
           "    [a] {txt}\n".format(txt=loc["rm_a"]) +
           "   URLs: http://{ipa} -or- http://tronferno.fritz.box\n".format(ipa=misc_data["ipaddr"]) +
           "\n")
