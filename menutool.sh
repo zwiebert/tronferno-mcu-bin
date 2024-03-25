@@ -34,7 +34,7 @@ run_menutool() {
 }
 
 install_pyserial() {
-	python -m pip install pyserial
+	python -m pip install -t ./tools pyserial
 }
 
 #try to install esptool unsing pip packet manager
