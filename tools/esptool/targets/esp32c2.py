@@ -8,6 +8,7 @@ import time
 
 from .esp32c3 import ESP32C3ROM
 from ..loader import ESPLoader
+from ..util import FatalError
 
 
 class ESP32C2ROM(ESP32C3ROM):
@@ -61,6 +62,8 @@ class ESP32C2ROM(ESP32C3ROM):
         [0x4037C000, 0x403C0000, "IRAM"],
     ]
 
+    UF2_FAMILY_ID = 0x2B88D29C
+
     def get_pkg_version(self):
         num_word = 1
         return (self.read_reg(self.EFUSE_BLOCK2_ADDR + (4 * num_word)) >> 22) & 0x07
@@ -81,6 +84,16 @@ class ESP32C2ROM(ESP32C3ROM):
     def get_major_chip_version(self):
         num_word = 1
         return (self.read_reg(self.EFUSE_BLOCK2_ADDR + (4 * num_word)) >> 20) & 0x3
+
+    def get_flash_cap(self):
+        # ESP32-C2 doesn't have eFuse field FLASH_CAP.
+        # Can't get info about the flash chip.
+        return 0
+
+    def get_flash_vendor(self):
+        # ESP32-C2 doesn't have eFuse field FLASH_VENDOR.
+        # Can't get info about the flash chip.
+        return ""
 
     def get_crystal_freq(self):
         # The crystal detection algorithm of ESP32/ESP8266 works for ESP32-C2 as well.
@@ -141,6 +154,10 @@ class ESP32C2ROM(ESP32C3ROM):
                 if key_word[i] != 0:
                     return True
             return False
+
+    def check_spi_connection(self, spi_connection):
+        if not set(spi_connection).issubset(set(range(0, 21))):
+            raise FatalError("SPI Pin numbers must be in the range 0-20.")
 
 
 class ESP32C2StubLoader(ESP32C2ROM):

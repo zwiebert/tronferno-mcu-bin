@@ -19,8 +19,6 @@ class ESP32S3ROM(ESP32ROM):
 
     CHIP_DETECT_MAGIC_VALUE = [0x9]
 
-    FPGA_SLOW_BOOT = False
-
     IROM_MAP_START = 0x42000000
     IROM_MAP_END = 0x44000000
     DROM_MAP_START = 0x3C000000
@@ -116,6 +114,8 @@ class ESP32S3ROM(ESP32ROM):
         [0x42000000, 0x42800000, "IROM"],
         [0x50000000, 0x50002000, "RTC_DATA"],
     ]
+
+    UF2_FAMILY_ID = 0xC47E5767
 
     def get_pkg_version(self):
         num_word = 3
@@ -348,6 +348,17 @@ class ESP32S3ROM(ESP32ROM):
 
     def change_baud(self, baud):
         ESPLoader.change_baud(self, baud)
+
+    def check_spi_connection(self, spi_connection):
+        if not set(spi_connection).issubset(set(range(0, 22)) | set(range(26, 49))):
+            raise FatalError("SPI Pin numbers must be in the range 0-21, or 26-48.")
+        if spi_connection[3] > 46:  # hd_gpio_num must be <= SPI_GPIO_NUM_LIMIT (46)
+            raise FatalError("SPI HD Pin number must be <= 46.")
+        if any([v for v in spi_connection if v in [19, 20]]):
+            print(
+                "WARNING: GPIO pins 19 and 20 are used by USB-Serial/JTAG and USB-OTG, "
+                "consider using other pins for SPI flash connection."
+            )
 
 
 class ESP32S3StubLoader(ESP32S3ROM):

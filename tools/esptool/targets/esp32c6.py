@@ -13,8 +13,6 @@ class ESP32C6ROM(ESP32C3ROM):
     CHIP_NAME = "ESP32-C6"
     IMAGE_CHIP_ID = 13
 
-    FPGA_SLOW_BOOT = False
-
     IROM_MAP_START = 0x42000000
     IROM_MAP_END = 0x42800000
     DROM_MAP_START = 0x42800000
@@ -101,6 +99,8 @@ class ESP32C6ROM(ESP32C3ROM):
         [0x600FE000, 0x60100000, "MEM_INTERNAL2"],
     ]
 
+    UF2_FAMILY_ID = 0x540DDF62
+
     def get_pkg_version(self):
         num_word = 3
         return (self.read_reg(self.EFUSE_BLOCK1_ADDR + (4 * num_word)) >> 24) & 0x07
@@ -179,6 +179,15 @@ class ESP32C6ROM(ESP32C3ROM):
         purposes = [self.get_key_block_purpose(b) for b in range(6)]
 
         return any(p == self.PURPOSE_VAL_XTS_AES128_KEY for p in purposes)
+
+    def check_spi_connection(self, spi_connection):
+        if not set(spi_connection).issubset(set(range(0, 31))):
+            raise FatalError("SPI Pin numbers must be in the range 0-30.")
+        if any([v for v in spi_connection if v in [12, 13]]):
+            print(
+                "WARNING: GPIO pins 12 and 13 are used by USB-Serial/JTAG, "
+                "consider using other pins for SPI flash connection."
+            )
 
 
 class ESP32C6StubLoader(ESP32C6ROM):

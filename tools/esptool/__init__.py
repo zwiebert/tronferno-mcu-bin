@@ -28,7 +28,8 @@ __all__ = [
     "write_mem",
 ]
 
-__version__ = "4.7.dev1"
+__version__ = "4.7.0"
+
 import argparse
 import inspect
 import os
@@ -37,6 +38,7 @@ import sys
 import time
 import traceback
 
+from esptool.bin_image import intel_hex_to_bin
 from esptool.cmds import (
     DETECTED_FLASH_SIZES,
     chip_id,
@@ -175,16 +177,18 @@ def main(argv=None, esp=None):
         parent.add_argument(
             "--spi-connection",
             "-sc",
-            help="ESP32-only argument. Override default SPI Flash connection. "
+            help="Override default SPI Flash connection. "
             "Value can be SPI, HSPI or a comma-separated list of 5 I/O numbers "
-            "to use for SPI flash (CLK,Q,D,HD,CS).",
+            "to use for SPI flash (CLK,Q,D,HD,CS). Not supported with ESP8266.",
             action=SpiConnectionAction,
         )
 
     parser_load_ram = subparsers.add_parser(
         "load_ram", help="Download an image to RAM and execute"
     )
-    parser_load_ram.add_argument("filename", help="Firmware image")
+    parser_load_ram.add_argument(
+        "filename", help="Firmware image", action=AutoHex2BinAction
+    )
 
     parser_dump_mem = subparsers.add_parser(
         "dump_mem", help="Dump arbitrary memory to disk"
@@ -356,7 +360,9 @@ def main(argv=None, esp=None):
     parser_image_info = subparsers.add_parser(
         "image_info", help="Dump headers from a binary file (bootloader or application)"
     )
-    parser_image_info.add_argument("filename", help="Image file to parse")
+    parser_image_info.add_argument(
+        "filename", help="Image file to parse", action=AutoHex2BinAction
+    )
     parser_image_info.add_argument(
         "--version",
         "-v",
@@ -476,6 +482,17 @@ def main(argv=None, esp=None):
         "must be aligned to. Value 0xFF is used for padding, similar to erase_flash",
         default=None,
     )
+    parser_elf2image.add_argument(
+        "--ram-only-header",
+        help="Order segments of the output so IRAM and DRAM are placed at the "
+        "beginning and force the main header segment number to RAM segments "
+        "quantity. This will make the other segments invisible to the ROM "
+        "loader. Use this argument with care because the ROM loader will load "
+        "only the RAM segments although the other segments being present in "
+        "the output.",
+        action="store_true",
+        default=None,
+    )
 
     add_spi_flash_subparsers(parser_elf2image, allow_keep=False, auto_detect=False)
 
@@ -586,18 +603,36 @@ def main(argv=None, esp=None):
         "--output", "-o", help="Output filename", type=str, required=True
     )
     parser_merge_bin.add_argument(
-        "--format", "-f", help="Format of the output file", choices="raw", default="raw"
-    )  # for future expansion
+        "--format",
+        "-f",
+        help="Format of the output file",
+        choices=["raw", "uf2", "hex"],
+        default="raw",
+    )
+    uf2_group = parser_merge_bin.add_argument_group("UF2 format")
+    uf2_group.add_argument(
+        "--chunk-size",
+        help="Specify the used data part of the 512 byte UF2 block. "
+        "A common value is 256. By default the largest possible value will be used.",
+        default=None,
+        type=arg_auto_chunk_size,
+    )
+    uf2_group.add_argument(
+        "--md5-disable",
+        help="Disable MD5 checksum in UF2 output",
+        action="store_true",
+    )
     add_spi_flash_subparsers(parser_merge_bin, allow_keep=True, auto_detect=False)
 
-    parser_merge_bin.add_argument(
+    raw_group = parser_merge_bin.add_argument_group("RAW format")
+    raw_group.add_argument(
         "--target-offset",
         "-t",
         help="Target offset where the output file will be flashed",
         type=arg_auto_int,
         default=0,
     )
-    parser_merge_bin.add_argument(
+    raw_group.add_argument(
         "--fill-flash-size",
         help="If set, the final binary file will be padded with FF "
         "bytes up to this flash size.",
@@ -735,14 +770,22 @@ def main(argv=None, esp=None):
                     "Keeping initial baud rate %d" % initial_baud
                 )
 
-        # override common SPI flash parameter stuff if configured to do so
+        # Override the common SPI flash parameter stuff if configured to do so
         if hasattr(args, "spi_connection") and args.spi_connection is not None:
-            if esp.CHIP_NAME != "ESP32":
-                raise FatalError(
-                    "Chip %s does not support --spi-connection option." % esp.CHIP_NAME
-                )
-            print("Configuring SPI flash mode...")
-            esp.flash_spi_attach(args.spi_connection)
+            spi_config = args.spi_connection
+            if args.spi_connection == "SPI":
+                value = 0
+            elif args.spi_connection == "HSPI":
+                value = 1
+            else:
+                esp.check_spi_connection(args.spi_connection)
+                # Encode the pin numbers as a 32-bit integer with packed 6-bit values,
+                # the same way the ESP ROM takes them
+                clk, q, d, hd, cs = args.spi_connection
+                spi_config = f"CLK:{clk}, Q:{q}, D:{d}, HD:{hd}, CS:{cs}"
+                value = (hd << 24) | (cs << 18) | (d << 12) | (q << 6) | clk
+            print(f"Configuring SPI flash mode ({spi_config})...")
+            esp.flash_spi_attach(value)
         elif args.no_stub:
             print("Enabling default SPI flash mode...")
             # ROM loader doesn't enable flash unless we explicitly do it
@@ -811,6 +854,15 @@ def main(argv=None, esp=None):
                         "Try checking the chip connections or removing "
                         "any other hardware connected to IOs."
                     )
+                    if (
+                        hasattr(args, "spi_connection")
+                        and args.spi_connection is not None
+                    ):
+                        print(
+                            "Some GPIO pins might be used by other peripherals, "
+                            "try using another --spi-connection combination."
+                        )
+
             except FatalError as e:
                 raise FatalError(f"Unable to verify flash chip connection ({e}).")
 
@@ -833,7 +885,11 @@ def main(argv=None, esp=None):
             if flash_size is not None:  # Secure download mode
                 esp.flash_set_parameters(flash_size_bytes(flash_size))
                 # Check if stub supports chosen flash size
-                if esp.IS_STUB and flash_size in ("32MB", "64MB", "128MB"):
+                if (
+                    esp.IS_STUB
+                    and esp.CHIP_NAME != "ESP32-S3"
+                    and flash_size_bytes(flash_size) > 16 * 1024 * 1024
+                ):
                     print(
                         "WARNING: Flasher stub doesn't fully support flash size larger "
                         "than 16MB, in case of failure use --no-stub."
@@ -857,7 +913,7 @@ def main(argv=None, esp=None):
             args.size = flash_size_bytes(size_str)
 
         if esp.IS_STUB and hasattr(args, "address") and hasattr(args, "size"):
-            if args.address + args.size > 0x1000000:
+            if esp.CHIP_NAME != "ESP32-S3" and args.address + args.size > 0x1000000:
                 print(
                     "WARNING: Flasher stub doesn't fully support flash size larger "
                     "than 16MB, in case of failure use --no-stub."
@@ -903,6 +959,13 @@ def arg_auto_int(x):
 def arg_auto_size(x):
     x = x.lower()
     return x if x == "all" else arg_auto_int(x)
+
+
+def arg_auto_chunk_size(string: str) -> int:
+    num = int(string, 0)
+    if num & 3 != 0:
+        raise argparse.ArgumentTypeError("Chunk size should be a 4-byte aligned number")
+    return num
 
 
 def get_port_list():
@@ -977,42 +1040,44 @@ class SpiConnectionAction(argparse.Action):
     """
 
     def __call__(self, parser, namespace, value, option_string=None):
-        if value.upper() == "SPI":
-            value = 0
-        elif value.upper() == "HSPI":
-            value = 1
+        if value.upper() in ["SPI", "HSPI"]:
+            values = value.upper()
         elif "," in value:
             values = value.split(",")
             if len(values) != 5:
                 raise argparse.ArgumentError(
                     self,
-                    "%s is not a valid list of comma-separate pin numbers. "
-                    "Must be 5 numbers - CLK,Q,D,HD,CS." % value,
+                    f"{value} is not a valid list of comma-separate pin numbers. "
+                    "Must be 5 numbers - CLK,Q,D,HD,CS.",
                 )
             try:
                 values = tuple(int(v, 0) for v in values)
             except ValueError:
                 raise argparse.ArgumentError(
                     self,
-                    "%s is not a valid argument. All pins must be numeric values"
-                    % values,
+                    f"{values} is not a valid argument. "
+                    "All pins must be numeric values",
                 )
-            if any([v for v in values if v > 33 or v < 0]):
-                raise argparse.ArgumentError(
-                    self, "Pin numbers must be in the range 0-33."
-                )
-            # encode the pin numbers as a 32-bit integer with packed 6-bit values,
-            # the same way ESP32 ROM takes them
-            # TODO: make this less ESP32 ROM specific somehow...
-            clk, q, d, hd, cs = values
-            value = (hd << 24) | (cs << 18) | (d << 12) | (q << 6) | clk
         else:
             raise argparse.ArgumentError(
                 self,
-                "%s is not a valid spi-connection value. "
-                "Values are SPI, HSPI, or a sequence of 5 pin numbers CLK,Q,D,HD,CS)."
-                % value,
+                f"{value} is not a valid spi-connection value. "
+                "Values are SPI, HSPI, or a sequence of 5 pin numbers - CLK,Q,D,HD,CS.",
             )
+        setattr(namespace, self.dest, values)
+
+
+class AutoHex2BinAction(argparse.Action):
+    """Custom parser class for auto conversion of input files from hex to bin"""
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        try:
+            with open(value, "rb") as f:
+                # if hex file was detected replace hex file with converted temp bin
+                # otherwise keep the original file
+                value = intel_hex_to_bin(f).name
+        except IOError as e:
+            raise argparse.ArgumentError(self, e)
         setattr(namespace, self.dest, value)
 
 
@@ -1044,6 +1109,8 @@ class AddrFilenamePairAction(argparse.Action):
                     "Must be pairs of an address "
                     "and the binary filename to write there",
                 )
+            # check for intel hex files and convert them to bin
+            argfile = intel_hex_to_bin(argfile, address)
             pairs.append((address, argfile))
 
         # Sort the addresses and check for overlapping

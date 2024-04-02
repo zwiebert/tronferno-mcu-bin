@@ -1,4 +1,4 @@
-#!/home/bertw/.espressif/python_env/idf5.1_py3.10_env/bin/python
+#!/home/bertw/bin/python
 #
 # SPDX-FileCopyrightText: 2014-2022 Fredrik Ahlberg, Angus Gratton,
 # Espressif Systems (Shanghai) CO LTD, other contributors as noted.

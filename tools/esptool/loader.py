@@ -170,6 +170,8 @@ class StubFlasher:
             self.data = None
             self.data_start = None
 
+        self.bss_start = stub.get("bss_start")
+
 
 class ESPLoader(object):
     """Base class providing access to ESP ROM & software stub bootloaders.
@@ -183,8 +185,6 @@ class ESPLoader(object):
 
     CHIP_NAME = "Espressif device"
     IS_STUB = False
-
-    FPGA_SLOW_BOOT = False
 
     DEFAULT_PORT = "/dev/ttyUSB0"
 
@@ -301,8 +301,39 @@ class ESPLoader(object):
         if isinstance(port, str):
             try:
                 self._port = serial.serial_for_url(port)
-            except serial.serialutil.SerialException:
-                raise FatalError(f"Could not open {port}, the port doesn't exist")
+            except serial.serialutil.SerialException as e:
+                port_issues = [
+                    [  # does not exist error
+                        re.compile(r"Errno 2|FileNotFoundError", re.IGNORECASE),
+                        "Check if the port is correct and ESP connected",
+                    ],
+                    [  # busy port error
+                        re.compile(r"Access is denied", re.IGNORECASE),
+                        "Check if the port is not used by another task",
+                    ],
+                ]
+                if sys.platform.startswith("linux"):
+                    port_issues.append(
+                        [  # permission denied error
+                            re.compile(r"Permission denied", re.IGNORECASE),
+                            (
+                                "Try to add user into dialout group: "
+                                "sudo usermod -a -G dialout $USER"
+                            ),
+                        ],
+                    )
+
+                hint_msg = ""
+                for port_issue in port_issues:
+                    if port_issue[0].search(str(e)):
+                        hint_msg = f"\nHint: {port_issue[1]}\n"
+                        break
+
+                raise FatalError(
+                    f"Could not open {port}, the port is busy or doesn't exist."
+                    f"\n({e})\n"
+                    f"{hint_msg}"
+                )
         else:
             self._port = port
         self._slip_reader = slip_reader(self._port, self.trace)
@@ -597,7 +628,7 @@ class ESPLoader(object):
 
         # This FPGA delay is for Espressif internal use
         if (
-            self.FPGA_SLOW_BOOT
+            self.CHIP_NAME == "ESP32"
             and os.environ.get("ESPTOOL_ENV_FPGA", "").strip() == "1"
         ):
             delay = extra_delay = 7
@@ -651,8 +682,17 @@ class ESPLoader(object):
             print("")  # end 'Connecting...' line
 
         if last_error is not None:
+            additional_msg = ""
+            if self.CHIP_NAME == "ESP32-C2" and self._port.baudrate < 115200:
+                additional_msg = (
+                    "\nNote: Please set a higher baud rate (--baud)"
+                    " if ESP32-C2 doesn't connect"
+                    " (at least 115200 Bd is recommended)."
+                )
+
             raise FatalError(
                 "Failed to connect to {}: {}"
+                f"{additional_msg}"
                 "\nFor troubleshooting steps visit: "
                 "https://docs.espressif.com/projects/esptool/en/latest/troubleshooting.html".format(  # noqa E501
                     self.CHIP_NAME, last_error
@@ -751,17 +791,17 @@ class ESPLoader(object):
             stub = StubFlasher(get_stub_json_path(self.CHIP_NAME))
             load_start = offset
             load_end = offset + size
-            for start, end in [
-                (stub.data_start, stub.data_start + len(stub.data)),
-                (stub.text_start, stub.text_start + len(stub.text)),
+            for stub_start, stub_end in [
+                (stub.bss_start, stub.data_start + len(stub.data)),  # DRAM = bss+data
+                (stub.text_start, stub.text_start + len(stub.text)),  # IRAM
             ]:
-                if load_start < end and load_end > start:
+                if load_start < stub_end and load_end > stub_start:
                     raise FatalError(
                         "Software loader is resident at 0x%08x-0x%08x. "
                         "Can't load binary at overlapping address range 0x%08x-0x%08x. "
                         "Either change binary loading address, or use the --no-stub "
                         "option to disable the software loader."
-                        % (start, end, load_start, load_end)
+                        % (stub_start, stub_end, load_start, load_end)
                     )
 
         return self.check_command(

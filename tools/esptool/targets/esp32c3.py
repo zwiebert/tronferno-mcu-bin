@@ -14,8 +14,6 @@ class ESP32C3ROM(ESP32ROM):
     CHIP_NAME = "ESP32-C3"
     IMAGE_CHIP_ID = 5
 
-    FPGA_SLOW_BOOT = False
-
     IROM_MAP_START = 0x42000000
     IROM_MAP_END = 0x42800000
     DROM_MAP_START = 0x3C000000
@@ -31,8 +29,8 @@ class ESP32C3ROM(ESP32ROM):
 
     BOOTLOADER_FLASH_OFFSET = 0x0
 
-    # Magic value for ESP32C3 eco 1+2 and ESP32C3 eco3 respectivly
-    CHIP_DETECT_MAGIC_VALUE = [0x6921506F, 0x1B31506F]
+    # Magic values for ESP32-C3 eco 1+2, eco 3, eco 6, and eco 7 respectively
+    CHIP_DETECT_MAGIC_VALUE = [0x6921506F, 0x1B31506F, 0x4881606F, 0x4361606F]
 
     UART_DATE_REG_ADDR = 0x60000000 + 0x7C
 
@@ -98,6 +96,8 @@ class ESP32C3ROM(ESP32ROM):
         [0x50000000, 0x50002000, "RTC_DRAM"],
         [0x600FE000, 0x60100000, "MEM_INTERNAL2"],
     ]
+
+    UF2_FAMILY_ID = 0xD42BA06C
 
     def get_pkg_version(self):
         num_word = 3
@@ -227,6 +227,15 @@ class ESP32C3ROM(ESP32ROM):
     def _post_connect(self):
         if not self.sync_stub_detected:  # Don't run if stub is reused
             self.disable_watchdogs()
+
+    def check_spi_connection(self, spi_connection):
+        if not set(spi_connection).issubset(set(range(0, 22))):
+            raise FatalError("SPI Pin numbers must be in the range 0-21.")
+        if any([v for v in spi_connection if v in [18, 19]]):
+            print(
+                "WARNING: GPIO pins 18 and 19 are used by USB-Serial/JTAG, "
+                "consider using other pins for SPI flash connection."
+            )
 
 
 class ESP32C3StubLoader(ESP32C3ROM):

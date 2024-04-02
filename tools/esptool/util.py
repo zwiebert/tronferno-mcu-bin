@@ -68,7 +68,7 @@ def print_overwrite(message, last_line=False):
     If output is not a TTY (for example redirected a pipe),
     no overwriting happens and this function is the same as print().
     """
-    if sys.stdout.isatty():
+    if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
         print("\r%s" % message, end="\n" if last_line else "")
     else:
         print(message)
@@ -167,7 +167,7 @@ class NotSupportedError(FatalError):
     def __init__(self, esp, function_name):
         FatalError.__init__(
             self,
-            "Function %s is not supported for %s." % (function_name, esp.CHIP_NAME),
+            f"{function_name} is not supported by {esp.CHIP_NAME}.",
         )
 
 

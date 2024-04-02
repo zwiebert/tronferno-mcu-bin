@@ -14,14 +14,12 @@ class ESP32P4ROM(ESP32ROM):
     CHIP_NAME = "ESP32-P4"
     IMAGE_CHIP_ID = 18
 
-    FPGA_SLOW_BOOT = False
-
     IROM_MAP_START = 0x40000000
-    IROM_MAP_END = 0x44000000
+    IROM_MAP_END = 0x4C000000
     DROM_MAP_START = 0x40000000
-    DROM_MAP_END = 0x44000000
+    DROM_MAP_END = 0x4C000000
 
-    BOOTLOADER_FLASH_OFFSET = 0x0
+    BOOTLOADER_FLASH_OFFSET = 0x2000  # First 2 sectors are reserved for FE purposes
 
     CHIP_DETECT_MAGIC_VALUE = [0x0]
 
@@ -31,7 +29,13 @@ class ESP32P4ROM(ESP32ROM):
     EFUSE_BLOCK1_ADDR = EFUSE_BASE + 0x044
     MAC_EFUSE_REG = EFUSE_BASE + 0x044
 
-    SPI_REG_BASE = 0x5008C000
+    SPI_REG_BASE = 0x5008D000  # SPIMEM1
+    SPI_USR_OFFS = 0x18
+    SPI_USR1_OFFS = 0x1C
+    SPI_USR2_OFFS = 0x20
+    SPI_MOSI_DLEN_OFFS = 0x24
+    SPI_MISO_DLEN_OFFS = 0x28
+    SPI_W0_OFFS = 0x58
 
     EFUSE_RD_REG_BASE = EFUSE_BASE + 0x030  # BLOCK0 read base address
 
@@ -67,17 +71,19 @@ class ESP32P4ROM(ESP32ROM):
 
     MEMORY_MAP = [
         [0x00000000, 0x00010000, "PADDING"],
-        [0x40000000, 0x44000000, "DROM"],
+        [0x40000000, 0x4C000000, "DROM"],
         [0x4FF00000, 0x4FFA0000, "DRAM"],
         [0x4FF00000, 0x4FFA0000, "BYTE_ACCESSIBLE"],
         [0x4FC00000, 0x4FC20000, "DROM_MASK"],
         [0x4FC00000, 0x4FC20000, "IROM_MASK"],
-        [0x40000000, 0x44000000, "IROM"],
+        [0x40000000, 0x4C000000, "IROM"],
         [0x4FF00000, 0x4FFA0000, "IRAM"],
         [0x50108000, 0x50110000, "RTC_IRAM"],
         [0x50108000, 0x50110000, "RTC_DRAM"],
         [0x600FE000, 0x60100000, "MEM_INTERNAL2"],
     ]
+
+    UF2_FAMILY_ID = 0x3D308E94
 
     def get_pkg_version(self):
         # ESP32P4 TODO
@@ -158,9 +164,13 @@ class ESP32P4ROM(ESP32ROM):
         ESPLoader.change_baud(self, baud)
 
     def _post_connect(self):
-        # ESP32-P4 doesn't have stub flasher support yet
-        self.stub_is_disabled = True
-        self.IS_STUB = False
+        pass
+        # TODO: Disable watchdogs when USB modes are supported in the stub
+        # if not self.sync_stub_detected:  # Don't run if stub is reused
+        #     self.disable_watchdogs()
+
+    def check_spi_connection(self, spi_connection):
+        pass  # TODO: Define GPIOs for --spi-connection
 
 
 class ESP32P4StubLoader(ESP32P4ROM):
@@ -178,6 +188,7 @@ class ESP32P4StubLoader(ESP32P4ROM):
         self.secure_download_mode = rom_loader.secure_download_mode
         self._port = rom_loader._port
         self._trace_enabled = rom_loader._trace_enabled
+        self.cache = rom_loader.cache
         self.flush_input()  # resets _slip_reader
 
 
