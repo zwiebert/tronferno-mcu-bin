@@ -2,15 +2,6 @@ THIS_ROOT := $(realpath .)
 TRONFERNO_MCU_ROOT = $(THIS_ROOT)/tronferno-mcu
 BUILD_BASE = $(THIS_ROOT)/tmp
 TRONFERNO_MCU_REPO := $(realpath ../tronferno-mcu)
-COMPONENTS_MCU_REPO := $(realpath ../components-mcu)
-TRONFERNO_LIB_REPO := $(realpath ../tronferno-lib)
-
-ESP8266_MK_FLAGS = DISTRO=1 FW_BASE=$(BUILD_BASE)/esp8266_firmware BUILD_BASE=$(BUILD_BASE)/esp8266_build -C $(TRONFERNO_MCU_ROOT)
-
-
-AVR_FW_DIR = $(BUILD_BASE)/atmega328_firmware
-AVR_BUILD_DIR = $(BUILD_BASE)/atmega328_build
-AVR_MK_FLAGS = DISTRO=1 FW_BASE=$(AVR_FW_DIR) BUILD_BASE=$(AVR_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 
 ESP32_BUILD_DIR = $(BUILD_BASE)/esp32_build
@@ -22,12 +13,8 @@ ESP32_TEST_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO
 BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
 FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
 
-ATMEGA328_CO = e29af9767c6492f66b1fe99637737d14fd82d5b9
-ATMEGA328_DOC_CO = 7904350e42f668603a721bc844ca3f4614186431
 .PHONY : all clean clean2 commit pull push distribute fetch_source
 .PHONY : esp32 pre_esp32 main_esp32 post_esp32
-.PHONY : esp8266 pre_esp8266 main_esp8266 post_esp8266
-.PHONY : atmega328 pre_atmega328 main_atmega328 post_atmega328
 .PHONY : co_master
 
 GIT_BRANCH ?= $(shell git branch | grep \* | cut -d ' ' -f2)
@@ -41,31 +28,13 @@ deploy: commit push tag
 print_branch:
 	@echo ${GIT_BRANCH}
 
-esp8266: pre_esp8266 main_esp8266 post_esp8266
 esp32: pre_esp32 main_esp32 post_esp32
 esp32_test: pre_esp32 test_esp32
-atmega328: pre_atmega328 main_atmega328 post_atmega328
 
 co_master:
 	-rm -rf $(TRONFERNO_MCU_ROOT)
 	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
-	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app_config/include/app_config/proj_app_cfg.h))
-	git -C $(TRONFERNO_MCU_ROOT) submodule init external/components-mcu external/tronferno-lib
-	echo "locally fetch submodule components-mcu" ${GIT_BRANCH}
-	cd $(TRONFERNO_MCU_ROOT)/external/components-mcu &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(COMPONENTS_MCU_REPO) $(GIT_BRANCH)
-	echo "locally fetch submodule tronferno-lib" ${GIT_BRANCH}
-	cd $(TRONFERNO_MCU_ROOT)/external/tronferno-lib &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(TRONFERNO_LIB_REPO) $(GIT_BRANCH)
 	git submodule init  &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --init --recursive
-
-pre_esp8266: co_master
-	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
-	mkdir -p firmware/esp8266
-	make  $(ESP8266_MK_FLAGS) esp8266-clean
-main_esp8266:
-	make  $(ESP8266_MK_FLAGS) esp8266-all
-post_esp8266: copy_docs
-	cp -p $(BUILD_BASE)/esp8266_firmware/eagle.flash.bin $(BUILD_BASE)/esp8266_firmware/eagle.irom0text.bin ~/esp/ESP8266_NONOS_SDK/bin/esp_init_data_default_v08.bin ./firmware/esp8266/
-
 
 pre_esp32: co_master test_host
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
@@ -81,14 +50,6 @@ post_esp32: copy_docs
 	cp -p $(ESP32_BUILD_DIR)/bootloader/bootloader.bin $(ESP32_BUILD_DIR)/tronferno-mcu.elf $ $(ESP32_BUILD_DIR)/tronferno-mcu.bin $(ESP32_BUILD_DIR)/ota_data_initial.bin ./firmware/esp32/
 	cp -p $(ESP32_BUILD_DIR)/partition_table/partition-table.bin ./firmware/esp32/partitions.bin
 
-pre_atmega328: co_master
-	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(ATMEGA328_CO) &&  git clean -fd
-	mkdir -p firmware/atmega328
-	make  $(AVR_MK_FLAGS) atmega328-clean
-main_atmega328:
-	make  $(AVR_MK_FLAGS) atmega328-all
-post_atmega328: copy_avr_docs
-	cp -p $(BUILD_BASE)/atmega328_firmware/fernotron.hex $(BUILD_BASE)/atmega328_firmware/fernotron.eep ./firmware/atmega328/
 
 all:  esp32
 
