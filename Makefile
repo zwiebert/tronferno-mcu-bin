@@ -3,6 +3,7 @@ TRONFERNO_MCU_ROOT = $(THIS_ROOT)/tronferno-mcu
 BUILD_BASE = $(THIS_ROOT)/tmp
 TRONFERNO_MCU_REPO := $(realpath ../tronferno-mcu)
 COMPONENTS_MCU_REPO := $(realpath ../components-mcu)
+TRONFERNO_LIB_REPO := $(realpath ../tronferno-lib)
 
 ESP8266_MK_FLAGS = DISTRO=1 FW_BASE=$(BUILD_BASE)/esp8266_firmware BUILD_BASE=$(BUILD_BASE)/esp8266_build -C $(TRONFERNO_MCU_ROOT)
 
@@ -49,8 +50,11 @@ co_master:
 	-rm -rf $(TRONFERNO_MCU_ROOT)
 	git clone --local --no-hardlinks $(TRONFERNO_MCU_REPO) --branch $(GIT_BRANCH) --single-branch
 	$(eval APP_VERSION := $(shell sed -E -e '/APP_VERSION/!d' -e 's/^.*APP_VERSION *"(.+)"/\1/' $(TRONFERNO_MCU_ROOT)/src/components/app_config/include/app_config/proj_app_cfg.h))
-	git -C $(TRONFERNO_MCU_ROOT) submodule init comp/components-mcu
-	cd $(TRONFERNO_MCU_ROOT)/comp/components-mcu &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(COMPONENTS_MCU_REPO) $(GIT_BRANCH) && \
+	git -C $(TRONFERNO_MCU_ROOT) submodule init external/components-mcu external/tronferno-lib
+	echo "locally fetch submodule components-mcu" ${GIT_BRANCH}
+	cd $(TRONFERNO_MCU_ROOT)/external/components-mcu &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(COMPONENTS_MCU_REPO) $(GIT_BRANCH)
+	echo "locally fetch submodule tronferno-lib" ${GIT_BRANCH}
+	cd $(TRONFERNO_MCU_ROOT)/external/tronferno-lib &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --no-fetch || true && git checkout -B $(GIT_BRANCH) && git pull $(TRONFERNO_LIB_REPO) $(GIT_BRANCH)
 	git submodule init  &&  git -C $(TRONFERNO_MCU_ROOT) submodule update --init --recursive
 
 pre_esp8266: co_master
