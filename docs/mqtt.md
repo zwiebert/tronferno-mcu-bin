@@ -1,4 +1,8 @@
-##### MQTT Topics you can send to:
+|Change Language: [Deutsch](mqtt-de.md), English|
+
+## MQTT Client
+
+#### MQTT Topics you can send to:
 
 * tfmcu/+/cmd - Commands like up, down, stop
      * The plus sign represents the ID of the shutter:

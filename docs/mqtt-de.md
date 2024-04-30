@@ -1,4 +1,8 @@
-### MQTT Topics an die du senden kannst:
+|Change Language: Deutsch, [English](mqtt.md)|
+
+## MQTT Klient
+
+#### MQTT Topics an die du senden kannst:
 
 * tfmcu/+/cmd - Kommandos wie: up, down, stop, ...
      * Das Plus-Zeichen steht für Gruppe und Nummer des Empfängers (bei Bedarf auch ID):
