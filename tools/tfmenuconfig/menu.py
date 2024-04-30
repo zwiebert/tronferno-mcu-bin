@@ -199,7 +199,7 @@ def ui_menu_root():
         clear_screen()
         if ask_yes_no(loc["rm_t_req"]):
             try:
-                miniterm.main(c_flash["serial-port"], c_flash["serial-baud"])
+                miniterm.main(c_flash["serial-port"], 115250)
             except Exception as e:
                 print("ex: %s" % e)
                 press_enter()
