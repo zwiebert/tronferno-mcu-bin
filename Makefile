@@ -5,7 +5,7 @@ TRONFERNO_MCU_REPO := $(realpath ../tronferno-mcu)
 
 
 ESP32_BUILD_DIR = $(BUILD_BASE)/esp32_build
-ESP32_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
+ESP32_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT) flavor=esp32-wt32-eth01
 
 ESP32_TEST_BUILD_DIR = $(BUILD_BASE)/esp32_test_build
 ESP32_TEST_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
@@ -22,7 +22,7 @@ GIT_BRANCH ?= $(shell git branch | grep \* | cut -d ' ' -f2)
 
 distribute : clean all commit push tag
 build : clean all 
-deploy: commit push tag
+deploy: commit push
 
 .PHONY : print_branch
 print_branch:
