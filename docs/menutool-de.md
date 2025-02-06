@@ -1,4 +1,6 @@
-### tronferno-menutool
+|Change Language: Deutsch, [English](menutool.md)|
+
+## tronferno-menutool
 
   * Das Tool dient zum interaktiven Flashen der Firmware und zum Konfigurieren der WLAN Verbindung
   
@@ -7,32 +9,33 @@
 
 ```
 
-Press [key] to choose menu item:
+Tronferno MCU Flash Assistent
+--------------------------------------
+[s] Speichern  [X] Beenden [L] Sprache
+--------------------------------------
 
 
-   Save Progress / Quitting:
-    [s] Save your changes (e.g. serial port, MCU pre-configuration)
-    [X] Exit this program  (unsaved data will be lost)
+1) Verbindung zum Mikrocontroller:
+    [i] Suche Chip an USB ports
+    [I] Zeige Info über Chip (esp32@/dev/ttyUSB1):
+    [f] Konfiguriere USB und Flash
+    [t] Starte serielles Terminal (Miniterm)
 
-1) Connect to the Microcontroller:
-    [i] Find connected chips and print info
-    [p] Choose the connected USB/COM port
-    [I] Print info about chip esp32@/dev/ttyUSB1
-    [f] If needed: configure some more flash options
+2) Flashe dem Mikrocontroller (esp32@/dev/ttyUSB1):
+    [E] Lösche Flash Speicher komplett
+    [w] Flashe die Firmware
 
-2) Flash the Microcontroller:
-    [e] Erase flash (esp32@/dev/ttyUSB1). Usually not needed. Clears any data and firmware.
-    [w] Write firmware to flash (esp32@/dev/ttyUSB1).
-3) Connect the Microncontroller to WIFI
-    [c] Configure tronferno-mcu options like WLAN and MQTT login data
-    [o] Write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)
+3) Verbinde den Mikrocontroller zum Netzwerk
+    [c] Konfiguriere Verbindungsdaten (WLAN,MQTT)
+    [o] Schreibe Verbindungsdaten zum Mikrocontroller (erst nach dem Flashen möglich)
 
-4) Access the builtin webserver: IP-Address: 0.0.0.0, Hostname: tronferno
-    [a] Get IP address from chip
-   URLs: http://0.0.0.0 -or- http://tronferno.fritz.box
+4) Zugriff auf Webserver erlangen: IP-Address: 1.2.3.4, Hostname: tronferno
+    [a] Hohle IP Adresse vom Chip
+   URLs: http://1.2.3.4 -or- http://tronferno.fritz.box
 
 ```
   1)
+     * Wähle Anzeigesprache Deutsch mit 'L' (shift-L)
      * Schließe Mikrocontroller über USB an
      * Drücke 'i' zum Ausprobieren welcher COM/USB-Port der richtige ist
      * Drücke 'f' zur Konfiguration

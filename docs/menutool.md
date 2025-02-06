@@ -1,4 +1,6 @@
-### tronferno-menutool
+|Change Language: [Deutsch](menutool-de.md), English|
+
+## tronferno-menutool
 
   * The tool lets you flash the firmware and aids in configuring the WIFI connection.
   
@@ -7,30 +9,31 @@
 
 ```
 
-Press [key] to choose menu item:
+Tronferno MCU Flash Assistant
+-------------------------------
+[s] Save  [X] Exit [L] Language
+-------------------------------
 
-
-   Save Progress / Quitting:
-    [s] Save your changes (e.g. serial port, MCU pre-configuration)
-    [X] Exit this program  (unsaved data will be lost)
 
 1) Connect to the Microcontroller:
-    [i] Find connected chips and print info
-    [p] Choose the connected USB/COM port
-    [I] Print info about chip esp32@/dev/ttyUSB1
-    [f] If needed: configure some more flash options
+    [i] Search ports for chip
+    [I] Print info about chip (esp32@/dev/ttyUSB1):
+    [f] Configure serial port and more
+    [t] Open MiniTerm serial terminal
 
-2) Flash the Microcontroller:
-    [e] Erase flash (esp32@/dev/ttyUSB1). Usually not needed. Clears any data and firmware.
-    [w] Write firmware to flash (esp32@/dev/ttyUSB1).
+2) Flash the Microcontroller (esp32@/dev/ttyUSB1):
+    [E] Erase flash. This wipes all data/firmware on the device
+    [w] Write firmware to flash
 
-3) Connect the Microncontroller to WIFI
+3) Connect the Microcontroller to Network
     [c] Configure tronferno-mcu options like WLAN and MQTT login data
     [o] Write tronferno-mcu options to chip via serial port (do this *after* flashing the firwmware)
 
-4) Access the builtin webserver: IP-Address: 0.0.0.0, Hostname: tronferno
+4) Access the builtin webserver: IP-Address: 1.2.3.4, Hostname: tronferno
     [a] Get IP address from chip
-   URLs: http://0.0.0.0 -or- http://tronferno.fritz.box
+   URLs: http://1.2.3.4 -or- http://tronferno.fritz.box
+
+
 
 ```
   1)
