@@ -3,15 +3,10 @@ TRONFERNO_MCU_ROOT = $(THIS_ROOT)/tronferno-mcu
 BUILD_BASE = $(THIS_ROOT)/tmp
 TRONFERNO_MCU_REPO := $(realpath ../tronferno-mcu)
 
-
 ESP32_BUILD_DIR = $(BUILD_BASE)/esp32_build
-ESP32_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
 
 ESP32_TEST_BUILD_DIR = $(BUILD_BASE)/esp32_test_build
 ESP32_TEST_MK_FLAGS = DISTRO=1 BUILD_BASE=$(ESP32_TEST_BUILD_DIR) -C $(TRONFERNO_MCU_ROOT)
-
-BUILD_DIRS = $(BUILD_BASE)/esp8266_build $(BUILD_BASE)/atmega328_build
-FW_DIRS = $(BUILD_BASE)/esp8266_firmware $(BUILD_BASE)/atmega328_firmware
 
 .PHONY : all clean clean2 commit pull push distribute fetch_source
 .PHONY : esp32 pre_esp32 main_esp32 post_esp32
@@ -39,13 +34,13 @@ co_master:
 pre_esp32: co_master test_host
 	cd $(TRONFERNO_MCU_ROOT) && git checkout --force $(GIT_BRANCH) && git pull && git clean -fd
 	mkdir -p firmware/esp32
-	make  $(ESP32_MK_FLAGS) esp32-clean
+	idf.py --preset esp32-release -C $(TRONFERNO_MCU_ROOT) -B $(ESP32_BUILD_DIR) fullclean
 test_esp32:
 	make $(ESP32_TEST_MK_FLAGS) esp32-test-clean esp32-test-build esp32-test-flash esp32-test-run
 test_host:
 	make $(ESP32_TEST_MK_FLAGS) host-test-all
 main_esp32:
-	make -j  $(ESP32_MK_FLAGS) esp32-all
+	idf.py --preset esp32-release -C $(TRONFERNO_MCU_ROOT) -B $(ESP32_BUILD_DIR) build
 post_esp32: copy_docs
 	cp -p $(ESP32_BUILD_DIR)/bootloader/bootloader.bin $(ESP32_BUILD_DIR)/tronferno-mcu.elf $ $(ESP32_BUILD_DIR)/tronferno-mcu.bin $(ESP32_BUILD_DIR)/ota_data_initial.bin ./firmware/esp32/
 	cp -p $(ESP32_BUILD_DIR)/partition_table/partition-table.bin ./firmware/esp32/partitions.bin
@@ -59,9 +54,7 @@ clean:
 	-rm -r tronferno-mcu/unity
 
 clean2:
-	make $(ESP8266_MK_FLAGS) esp8266-clean
-	make $(AVR_MK_FLAGS) atmega328-clean
-	make $(ESP32_MK_FLAGS) esp32-clean
+	idf.py --preset esp32-release -C $(TRONFERNO_MCU_ROOT) -B $(ESP32_BUILD_DIR) fullclean
 
 commit :
 	git commit -a -m "Version $(APP_VERSION) ($(GIT_BRANCH))"
